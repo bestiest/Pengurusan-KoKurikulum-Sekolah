@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 from app.models import AttendanceSessionCreate, AttendanceRecordItem
 
 router = APIRouter(prefix="/api/attendance", tags=["Kehadiran Kokurikulum"])
@@ -238,7 +238,7 @@ async def update_attendance_session(
 @router.delete("/sessions/{session_id}")
 async def delete_attendance_session(
     session_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     target = conn.execute("SELECT activity_title FROM attendance_sessions WHERE id = ?", (session_id,)).fetchone()

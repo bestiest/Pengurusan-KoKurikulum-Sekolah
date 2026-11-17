@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 import re
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 
 router = APIRouter(prefix="/api/sports", tags=["sports"])
 
@@ -111,7 +111,7 @@ async def create_or_update_sports_event(
 @router.delete("/events/{event_id}")
 async def delete_sports_event(
     event_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     conn.execute("DELETE FROM school_sports_events WHERE id = ?", (event_id,))
@@ -376,7 +376,7 @@ async def record_event_results(
 @router.delete("/results/{event_id}")
 async def delete_sports_event_results(
     event_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Guru Pemimpin"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     ev = conn.execute("SELECT event_name FROM school_sports_events WHERE id = ?", (event_id,)).fetchone()

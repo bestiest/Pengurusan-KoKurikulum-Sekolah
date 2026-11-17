@@ -2,10 +2,90 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
-from app.models import PermissionLetterCreate, PermissionStatusUpdate
+from app.auth import get_current_user, require_roles, require_deletion_roles
+from app.models import PermissionLetterCreate, PermissionStatusUpdate, StudentJerseyUpdate
+from app.routers.pajsk_router import calculate_pajsk_score
 
 router = APIRouter(prefix="/api/permission-letters", tags=["Surat Kebenaran Murid"])
+
+def sync_permission_letter_to_pajsk(cursor, letter_id: int, data: PermissionLetterCreate, user: Dict[str, Any], student_ids: List[int], letter_no: str):
+    """Automatically synchronizes permission letter to PAJSK external participations."""
+    event_date = data.start_datetime.split()[0] if data.start_datetime else "2026-08-25"
+    level = data.participation_level or "Daerah"
+    category = data.activity_category or "Sukan & Permainan"
+
+    # Check if external_participations record exists for this letter_id
+    existing_ep = cursor.execute("SELECT id FROM external_participations WHERE permission_letter_id = ?", (letter_id,)).fetchone()
+
+    if existing_ep:
+        ep_id = existing_ep[0]
+        cursor.execute("""
+        UPDATE external_participations SET
+            program_name = ?,
+            event_date = ?,
+            venue = ?,
+            organizer = ?,
+            activity_category = ?,
+            participation_level = ?,
+            represented_org_id = ?,
+            notes = ?,
+            verified_by = ?,
+            verified_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """, (
+            data.program_name.strip(),
+            event_date,
+            data.destination_venue.strip(),
+            data.organizer.strip(),
+            category,
+            level,
+            data.represented_org_id,
+            f"Diselaraskan secara automatik daripada Surat Kebenaran No: {letter_no}",
+            user.get("full_name") or "Penyelaras Kokurikulum",
+            ep_id
+        ))
+    else:
+        cursor.execute("""
+        INSERT INTO external_participations (
+            permission_letter_id, program_name, event_date, venue, organizer,
+            activity_category, participation_level, represented_org_id,
+            academic_year, notes, status, created_by, verified_by, verified_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '2026/2027', ?, 'Disahkan', ?, ?, CURRENT_TIMESTAMP)
+        """, (
+            letter_id,
+            data.program_name.strip(),
+            event_date,
+            data.destination_venue.strip(),
+            data.organizer.strip(),
+            category,
+            level,
+            data.represented_org_id,
+            f"Dijana secara automatik daripada Surat Kebenaran No: {letter_no}",
+            user.get("username"),
+            user.get("full_name") or "Penyelaras Kokurikulum"
+        ))
+        ep_id = cursor.lastrowid
+
+    # Preserve existing achievements and roles if already entered by teacher in PAJSK
+    existing_students = {
+        r[0]: (r[1], r[2], r[3])
+        for r in cursor.execute("SELECT student_id, role, achievement, remarks FROM external_participation_students WHERE participation_id = ?", (ep_id,)).fetchall()
+    }
+
+    cursor.execute("DELETE FROM external_participation_students WHERE participation_id = ?", (ep_id,))
+    for s_id in student_ids:
+        if s_id in existing_students:
+            role, achievement, remarks = existing_students[s_id]
+        else:
+            role = "Peserta"
+            achievement = "Penyertaan"
+            remarks = "Dijana dari Surat Kebenaran"
+        score = calculate_pajsk_score(level, achievement, role)
+        cursor.execute("""
+        INSERT INTO external_participation_students (
+            participation_id, student_id, role, achievement, pajsk_score, remarks
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        """, (ep_id, s_id, role, achievement, score, remarks))
 
 class AddStudentsToLetter(BaseModel):
     student_ids: List[int]
@@ -91,8 +171,9 @@ async def create_permission_letter(
         letter_no, program_name, destination_venue, start_datetime, end_datetime,
         organizer, transportation, accompanying_teachers, fee_amount,
         contact_person, contact_phone, special_instructions,
+        participation_level, activity_category, represented_org_id,
         academic_year, created_by
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '2026/2027', ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '2026/2027', ?)
     """, (
         letter_no,
         data.program_name.strip(),
@@ -106,6 +187,9 @@ async def create_permission_letter(
         data.contact_person,
         data.contact_phone,
         data.special_instructions,
+        data.participation_level or 'Daerah',
+        data.activity_category or 'Sukan & Permainan',
+        data.represented_org_id,
         user.get("username")
     ))
     letter_id = cursor.lastrowid
@@ -116,6 +200,9 @@ async def create_permission_letter(
         INSERT INTO permission_letter_students (letter_id, student_id, permission_status)
         VALUES (?, ?, 'Belum Diedarkan')
         """, (letter_id, s_id))
+
+    # Automatically sync to PAJSK external participations
+    sync_permission_letter_to_pajsk(cursor, letter_id, data, user, data.student_ids, letter_no)
 
     conn.commit()
     conn.close()
@@ -143,7 +230,8 @@ async def update_permission_letter(
     UPDATE permission_letters SET
         letter_no = ?, program_name = ?, destination_venue = ?, start_datetime = ?, end_datetime = ?,
         organizer = ?, transportation = ?, accompanying_teachers = ?, fee_amount = ?,
-        contact_person = ?, contact_phone = ?, special_instructions = ?
+        contact_person = ?, contact_phone = ?, special_instructions = ?,
+        participation_level = ?, activity_category = ?, represented_org_id = ?
     WHERE id = ?
     """, (
         letter_no,
@@ -158,22 +246,31 @@ async def update_permission_letter(
         data.contact_person,
         data.contact_phone,
         data.special_instructions,
+        data.participation_level or 'Daerah',
+        data.activity_category or 'Sukan & Permainan',
+        data.represented_org_id,
         letter_id
     ))
 
     # Synchronize student list
     if data.student_ids is not None:
-        existing_statuses = {
-            r["student_id"]: r["permission_status"]
-            for r in conn.execute("SELECT student_id, permission_status FROM permission_letter_students WHERE letter_id = ?", (letter_id,)).fetchall()
+        existing_info = {
+            r["student_id"]: {
+                "permission_status": r["permission_status"],
+                "jersey_no": r["jersey_no"] if "jersey_no" in r.keys() else ""
+            }
+            for r in conn.execute("SELECT student_id, permission_status, jersey_no FROM permission_letter_students WHERE letter_id = ?", (letter_id,)).fetchall()
         }
         cursor.execute("DELETE FROM permission_letter_students WHERE letter_id = ?", (letter_id,))
         for s_id in data.student_ids:
-            st = existing_statuses.get(s_id, 'Belum Diedarkan')
+            info = existing_info.get(s_id, {"permission_status": "Belum Diedarkan", "jersey_no": ""})
             cursor.execute("""
-            INSERT INTO permission_letter_students (letter_id, student_id, permission_status)
-            VALUES (?, ?, ?)
-            """, (letter_id, s_id, st))
+            INSERT INTO permission_letter_students (letter_id, student_id, permission_status, jersey_no)
+            VALUES (?, ?, ?, ?)
+            """, (letter_id, s_id, info["permission_status"], info["jersey_no"]))
+
+        # Automatically sync to PAJSK external participations
+        sync_permission_letter_to_pajsk(cursor, letter_id, data, user, data.student_ids, letter_no)
 
     conn.commit()
     conn.close()
@@ -184,7 +281,7 @@ async def update_permission_letter(
 @router.delete("/{letter_id}")
 async def delete_permission_letter(
     letter_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Penyelaras Kokurikulum", "Guru Penasihat"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     target = conn.execute("SELECT program_name FROM permission_letters WHERE id = ?", (letter_id,)).fetchone()
@@ -194,6 +291,7 @@ async def delete_permission_letter(
 
     target_name = dict(target)['program_name']
     conn.execute("DELETE FROM permission_letter_students WHERE letter_id = ?", (letter_id,))
+    conn.execute("DELETE FROM external_participations WHERE permission_letter_id = ?", (letter_id,))
     conn.execute("DELETE FROM permission_letters WHERE id = ?", (letter_id,))
     conn.commit()
     conn.close()
@@ -212,16 +310,37 @@ async def update_student_consent_status(
     cursor = conn.cursor()
     cursor.execute("""
     UPDATE permission_letter_students SET
-        permission_status = ?,
-        parent_notes = ?,
+        permission_status = COALESCE(?, permission_status),
+        parent_notes = COALESCE(?, parent_notes),
+        jersey_no = COALESCE(?, jersey_no),
         response_date = CURRENT_DATE
     WHERE letter_id = ? AND student_id = ?
-    """, (data.permission_status, data.parent_notes, letter_id, student_id))
+    """, (data.permission_status, data.parent_notes, data.jersey_no, letter_id, student_id))
     conn.commit()
     conn.close()
 
     log_audit(user.get("id"), user.get("username"), user.get("role"), "UPDATE_STATUS", "PERMISSION_LETTERS", f"Kemas kini status kebenaran murid ID {student_id} kepada '{data.permission_status}'", target_id=letter_id)
     return {"status": "success", "message": "Status kebenaran murid berjaya dikemas kini."}
+
+@router.put("/{letter_id}/students/{student_id}/jersey")
+async def update_student_jersey_no(
+    letter_id: int,
+    student_id: int,
+    data: StudentJerseyUpdate,
+    user: Dict[str, Any] = Depends(get_current_user)
+):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE permission_letter_students SET
+        jersey_no = ?
+    WHERE letter_id = ? AND student_id = ?
+    """, (data.jersey_no.strip(), letter_id, student_id))
+    conn.commit()
+    conn.close()
+
+    log_audit(user.get("id"), user.get("username"), user.get("role"), "UPDATE_JERSEY", "PERMISSION_LETTERS", f"Kemas kini no jersi murid ID {student_id} kepada '{data.jersey_no}'", target_id=letter_id)
+    return {"status": "success", "message": "Nombor jersi berjaya dikemas kini."}
 
 @router.post("/{letter_id}/add-students")
 async def add_students_to_letter(
@@ -248,7 +367,7 @@ async def add_students_to_letter(
 async def remove_student_from_letter(
     letter_id: int,
     student_id: int,
-    user: Dict[str, Any] = Depends(get_current_user)
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     conn.execute("DELETE FROM permission_letter_students WHERE letter_id = ? AND student_id = ?", (letter_id, student_id))

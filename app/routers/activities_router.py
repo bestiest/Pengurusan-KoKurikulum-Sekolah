@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Query
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 from app.models import ActivityCreate, ActivityUpdate, ActivityStatusAction
 
 router = APIRouter(prefix="/api/activities", tags=["Aktiviti & Laporan Mingguan"])
@@ -468,20 +468,27 @@ async def process_activity_action(
 @router.delete("/{activity_id}")
 async def delete_activity(
     activity_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
-    target = conn.execute("SELECT title FROM weekly_activities WHERE id = ?", (activity_id,)).fetchone()
+    target = conn.execute("SELECT * FROM weekly_activities WHERE id = ?", (activity_id,)).fetchone()
     if not target:
         conn.close()
-        raise HTTPException(status_code=404, detail="Laporan tidak dijumpai.")
+        raise HTTPException(status_code=404, detail="Laporan aktiviti tidak dijumpai.")
+
+    target_dict = dict(target)
+    # Also clean up associated attendance session if matched
+    conn.execute("""
+        DELETE FROM attendance_sessions 
+        WHERE organization_id = ? AND session_date = ? AND (activity_title = ? OR activity_title LIKE ?)
+    """, (target_dict["organization_id"], target_dict["activity_date"], target_dict["title"], f"%{target_dict['title']}%"))
 
     conn.execute("DELETE FROM weekly_activities WHERE id = ?", (activity_id,))
     conn.commit()
     conn.close()
 
-    log_audit(user.get("id"), user.get("username"), user.get("role"), "DELETE", "ACTIVITIES", f"Padam laporan aktiviti: {dict(target)['title']}", target_id=activity_id)
-    return {"status": "success", "message": "Laporan aktiviti berjaya dipadam."}
+    log_audit(user.get("id"), user.get("username"), user.get("role"), "DELETE", "ACTIVITIES", f"Padam laporan aktiviti: {target_dict['title']}", target_id=activity_id)
+    return {"status": "success", "message": f"Laporan aktiviti '{target_dict['title']}' berjaya dipadam."}
 
 @router.post("/upload-photo")
 async def upload_activity_photo(

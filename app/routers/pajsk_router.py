@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 from app.models import ExternalParticipationCreate, ExternalParticipationStudentItem
 
 router = APIRouter(prefix="/api/pajsk", tags=["Penyertaan Luar & PAJSK"])
@@ -309,7 +309,7 @@ async def create_external_event(
 async def update_external_event(
     event_id: int,
     data: ExternalParticipationCreate,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Penyelaras Kokurikulum"))
+    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Penyelaras Kokurikulum", "Guru Penasihat"))
 ):
     conn = get_db_connection()
     existing = conn.execute("SELECT * FROM external_participations WHERE id = ?", (event_id,)).fetchone()
@@ -361,7 +361,7 @@ async def update_external_event(
 @router.delete("/events/{event_id}")
 async def delete_external_event(
     event_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     target = conn.execute("SELECT program_name FROM external_participations WHERE id = ?", (event_id,)).fetchone()

@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 import re
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 
 router = APIRouter(prefix="/api/cross-country", tags=["cross-country"])
 
@@ -276,7 +276,7 @@ async def record_cross_country_results(
 @router.delete("/results/{category_name}")
 async def delete_cross_country_results(
     category_name: str,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Guru Pemimpin"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     try:
         conn = get_db_connection()

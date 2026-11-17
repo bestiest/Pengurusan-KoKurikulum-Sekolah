@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from pydantic import BaseModel
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 from app.models import SchoolSettingsUpdate, ClassCreate, TeacherCreate
 from app.seed_data import seed_demo_data
 
@@ -18,12 +18,18 @@ class ArchiveYearRequest(BaseModel):
     notes: Optional[str] = None
 
 @router.get("/school")
-async def get_school_settings(user: Dict[str, Any] = Depends(get_current_user)):
+async def get_school_settings():
     conn = get_db_connection()
     row = conn.execute("SELECT * FROM school_settings WHERE id = 1").fetchone()
     conn.close()
     if not row:
-        raise HTTPException(status_code=404, detail="Tetapan sekolah tidak dijumpai.")
+        return {
+            "school_name": "SEKOLAH KEBANGSAAN SUNGAI DENDANG",
+            "school_code": "ABA6034",
+            "address": "SK Sungai Dendang, 34140 Rantau Panjang, Selama, Perak Darul Ridzuan",
+            "session_year": "2026/2027",
+            "logo_url": "/static/images/school_logo.png"
+        }
     return dict(row)
 
 @router.put("/school")
@@ -120,7 +126,7 @@ async def list_teachers(user: Dict[str, Any] = Depends(get_current_user)):
 @router.post("/teachers")
 async def create_teacher(
     data: TeacherCreate,
-    user: Dict[str, Any] = Depends(require_roles("Admin"))
+    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum"))
 ):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -136,7 +142,7 @@ async def create_teacher(
     return {"status": "success", "message": "Guru berjaya ditambah.", "id": new_id}
 
 @router.delete("/teachers/{teacher_id}")
-async def delete_teacher(teacher_id: int, user: Dict[str, Any] = Depends(require_roles("Admin"))):
+async def delete_teacher(teacher_id: int, user: Dict[str, Any] = Depends(require_deletion_roles())):
     conn = get_db_connection()
     conn.execute("DELETE FROM teachers WHERE id = ?", (teacher_id,))
     conn.commit()

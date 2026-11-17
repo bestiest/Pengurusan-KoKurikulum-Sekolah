@@ -47,176 +47,270 @@
   
   <!-- Custom CSS & Favicon -->
   <link rel="icon" type="image/png" href="/static/images/school_logo.png">
-  <link rel="stylesheet" href="/static/css/custom.css?v=2.5">
+  <link rel="stylesheet" href="/static/css/custom.css?v=5.2">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <!-- ========================================================= -->
-  <!-- 1. TOP NAVIGATION BAR (Header, Quick Role Switcher, User) -->
-  <!-- ========================================================= -->
-  <header id="top-navbar" class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="px-4 sm:px-6 py-2.5 flex items-center justify-between">
-      <!-- Left: Brand & Mobile Menu Toggle -->
-      <div class="flex items-center space-x-3">
-        <button onclick="app.toggleSidebar()" class="lg:hidden p-2 text-slate-600 hover:text-navy-900 rounded-lg hover:bg-slate-100">
-          <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-        <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigate('dashboard')">
-          <div class="w-11 h-11 bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center">
-            <img id="header-school-logo" src="/static/images/school_logo.png" alt="Logo SK Sungai Dendang" class="w-full h-full object-contain">
-          </div>
-          <div>
-            <h1 class="text-base sm:text-lg font-bold text-navy-900 leading-tight">Unit Kokurikulum</h1>
-            <p id="header-school-name" class="text-xs font-semibold text-slate-500 tracking-wide uppercase">SK SUNGAI DENDANG (ABA6034)</p>
-          </div>
-        </div>
-      </div>
+  <!-- ========================================== -->
+  <!-- VIEW 0: PAPARAN LOG IN (LOGIN PORTAL)      -->
+  <!-- ========================================== -->
+  <div id="view-login" class="min-h-screen w-full flex items-center justify-center py-10 px-4 bg-gradient-to-br from-slate-900 via-navy-950 to-blue-950 relative overflow-hidden">
+    <!-- Background Ambient Glow & Patterns -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
 
-      <!-- Right: Role Switcher, Session Badge, User Profile -->
-      <div class="flex items-center space-x-2 sm:space-x-4">
-        <!-- School Session Badge -->
-        <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1 text-blue-600"></i>
-          <span id="header-session-year">Sesi 2026/2027</span>
+    <div class="max-w-md w-full glass-card bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-300">
+      <!-- Card Header with School Logo & Title -->
+      <div class="p-6 sm:p-7 bg-gradient-to-b from-navy-950 via-navy-900 to-navy-800 text-white text-center relative border-b border-navy-700/50">
+        <div class="w-20 h-20 mx-auto bg-white p-2 rounded-2xl shadow-xl border border-slate-200 flex items-center justify-center mb-3 ring-4 ring-white/10">
+          <img id="login-school-logo" src="/static/images/school_logo.png" alt="Logo Sekolah" class="w-full h-full object-contain" onerror="this.src='/static/images/school_logo.png'">
+        </div>
+        <h2 id="login-school-name" class="text-base sm:text-lg font-black tracking-wide uppercase">SEKOLAH KEBANGSAAN SUNGAI DENDANG</h2>
+        <p class="text-xs text-blue-200 font-semibold mt-0.5 tracking-wider uppercase">Sistem Pengurusan Unit Kokurikulum</p>
+        <span class="inline-block mt-2 px-3 py-0.5 bg-blue-500/30 text-blue-200 text-[10px] font-bold rounded-full border border-blue-400/40">
+          Sesi Persekolahan 2026/2027
         </span>
-
-        <!-- Quick Role Switcher Dropdown / Pills for Testing -->
-        <div class="relative">
-          <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
-            <span class="text-[11px] font-bold text-slate-500 uppercase px-2 hidden sm:inline">Peranan:</span>
-            <select id="role-selector" onchange="app.handleRoleSwitch(this.value)" 
-              class="bg-white text-xs font-semibold text-slate-800 py-1 px-2.5 rounded-md shadow-sm border border-slate-300 outline-none cursor-pointer focus:ring-2 focus:ring-navy-600">
-              <option value="Admin">Admin (Pentadbir Sistem)</option>
-              <option value="GPK Kokurikulum">GPK Kokurikulum</option>
-              <option value="Setiausaha Kokurikulum">Setiausaha Kokurikulum</option>
-              <option value="Penyelaras Kokurikulum">Penyelaras Kokurikulum</option>
-              <option value="Guru Penasihat">Guru Penasihat</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- User Profile Pill -->
-        <div class="flex items-center space-x-2 pl-2 border-l border-slate-200">
-          <div class="w-8 h-8 rounded-full bg-navy-800 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-            <span id="user-avatar-initials">AD</span>
-          </div>
-          <div class="hidden xl:block text-left">
-            <div id="user-display-name" class="text-xs font-bold text-slate-800 truncate max-w-[140px]">Pentadbir Sistem</div>
-            <div id="user-role-badge" class="text-[10px] text-emerald-600 font-semibold">Admin</div>
-          </div>
-        </div>
       </div>
+
+      <!-- Login Form Body -->
+      <form id="form-login" onsubmit="app.handleLoginFormSubmit(event)" class="p-6 sm:p-7 space-y-4 text-xs">
+        <!-- ID Pengguna Field with Dropdown Selector -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block font-bold text-slate-700 uppercase text-[11px]">ID Pengguna (Username)</label>
+            <span class="text-[10px] text-blue-600 font-semibold">Pilih atau taip ID</span>
+          </div>
+          <div class="space-y-2">
+            <!-- Dropdown to select existing registered users -->
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </div>
+              <select id="login-username-select" onchange="app.onSelectLoginUsername(this.value)" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-navy-600 transition">
+                <option value="">-- Pilih ID Pengguna Sedia Ada --</option>
+                <option value="admin">🔴 admin - Pentadbir Sistem</option>
+                <option value="gpk_koko">🟡 gpk_koko - GPK Kokurikulum</option>
+                <option value="su_koko">🔵 su_koko - Setiausaha Kokurikulum</option>
+                <option value="guru_penasihat">🟢 guru_penasihat - Guru Penasihat</option>
+              </select>
+            </div>
+            <!-- Manual Input Field -->
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i data-lucide="user" class="w-4 h-4"></i>
+              </div>
+              <input type="text" id="login-username" required placeholder="Atau taip ID Pengguna anda..." class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-navy-600 focus:border-transparent transition">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1.5">Kata Laluan</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </div>
+            <input type="password" id="login-password" required placeholder="Masukkan kata laluan anda..." class="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-navy-600 focus:border-transparent transition">
+            <button type="button" onclick="app.togglePasswordVisibility('login-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="w-full py-3 bg-navy-800 hover:bg-navy-900 active:bg-navy-950 text-white font-black rounded-xl text-xs tracking-wider uppercase transition shadow-md hover:shadow-lg flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Log Masuk ke Portal</span>
+        </button>
+
+        <!-- New Teacher Registration Portal Link -->
+        <div class="pt-3 border-t border-slate-100 text-center">
+          <p class="text-[11px] text-slate-500 font-medium">Guru baharu belum mendaftar akaun?</p>
+          <button type="button" onclick="app.openPublicRegisterModal()" class="mt-1 text-xs font-bold text-navy-700 hover:text-navy-950 hover:underline flex items-center justify-center space-x-1.5 mx-auto transition cursor-pointer">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Daftar ID Guru Penasihat Baharu</span>
+          </button>
+        </div>
+      </form>
     </div>
-  </header>
+  </div>
 
   <!-- ========================================================= -->
-  <!-- 2. MAIN LAYOUT (Sidebar + Content Workspace)              -->
+  <!-- 2. AUTHENTICATED SYSTEM WORKSPACE (Hidden until Logged In) -->
   <!-- ========================================================= -->
-  <div class="flex flex-1 overflow-hidden relative">
-    
-    <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-20 w-64 bg-slate-900 text-slate-200 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto transition-transform duration-200 ease-in-out flex flex-col justify-between shadow-xl lg:shadow-none">
-      <div class="py-4 px-3 space-y-1 overflow-y-auto">
-        <!-- School Brand Header in Sidebar for Mobile -->
-        <div class="px-3 py-2 mb-3 bg-slate-800/80 rounded-xl border border-slate-700/50 flex items-center space-x-3 lg:hidden">
-          <img src="/static/images/school_logo.png" alt="Logo" class="w-8 h-8 object-contain">
-          <div>
-            <div class="text-xs font-bold text-white uppercase">SK Sungai Dendang</div>
-            <div class="text-[10px] text-slate-400">Unit Kokurikulum</div>
+  <div id="app-workspace" class="flex flex-col min-h-screen flex-1 hidden">
+
+    <!-- ========================================================= -->
+    <!-- 1. TOP NAVIGATION BAR (Header, Quick Role Switcher, User) -->
+    <!-- ========================================================= -->
+    <header id="top-navbar" class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+      <div class="px-4 sm:px-6 py-2.5 flex items-center justify-between">
+        <!-- Left: Brand & Mobile Menu Toggle -->
+        <div class="flex items-center space-x-3">
+          <button onclick="app.toggleSidebar()" class="lg:hidden p-2 text-slate-600 hover:text-navy-900 rounded-lg hover:bg-slate-100">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+          <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigate('dashboard')">
+            <div class="w-11 h-11 bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center">
+              <img id="header-school-logo" src="/static/images/school_logo.png" alt="Logo SK Sungai Dendang" class="w-full h-full object-contain">
+            </div>
+            <div>
+              <h1 class="text-base sm:text-lg font-bold text-navy-900 leading-tight">Unit Kokurikulum</h1>
+              <p id="header-school-name" class="text-xs font-semibold text-slate-500 tracking-wide uppercase">SK SUNGAI DENDANG (ABA6034)</p>
+            </div>
           </div>
         </div>
 
-        <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Modul Utama</p>
+        <!-- Right: Session Badge, User Profile & Logout -->
+        <div class="flex items-center space-x-3 sm:space-x-4">
+          <!-- School Session Badge -->
+          <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1 text-blue-600"></i>
+            <span id="header-session-year">Sesi 2026/2027</span>
+          </span>
 
-        <!-- 1. Dashboard Utama -->
-        <a href="#dashboard" onclick="app.navigate('dashboard'); return false;" id="nav-dashboard" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-400"></i>
-          <span>Dashboard Utama</span>
-        </a>
+          <!-- User Profile Pill (Click to Open Profile & Password Modal) -->
+          <button type="button" onclick="app.openMyProfileModal()" title="Kemaskini ID Pengguna, Profil & Kata Laluan Anda" class="flex items-center space-x-2 pl-2 border-l border-slate-200 hover:bg-slate-100 p-1.5 rounded-xl transition cursor-pointer text-left group">
+            <div class="w-8 h-8 rounded-full bg-navy-800 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-slate-200 group-hover:ring-navy-600 transition">
+              <span id="user-avatar-initials">AD</span>
+            </div>
+            <div class="hidden sm:block text-left">
+              <div class="flex items-center space-x-1">
+                <span id="user-display-name" class="text-xs font-bold text-slate-800 truncate max-w-[150px]">Pentadbir Sistem</span>
+                <i data-lucide="edit-3" class="w-3 h-3 text-slate-400 group-hover:text-navy-700 transition"></i>
+              </div>
+              <div id="user-role-badge" class="text-[10px] text-emerald-600 font-bold uppercase">Admin</div>
+            </div>
+          </button>
 
-        <!-- 2. Pengurusan Maklumat Murid -->
-        <a href="#students" onclick="app.navigate('students'); return false;" id="nav-students" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <div class="flex items-center space-x-3">
-            <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
-            <span>Maklumat Murid</span>
-          </div>
-          <span id="badge-student-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-bold">0</span>
-        </a>
-
-        <!-- 3. Pengurusan Organisasi Kokurikulum -->
-        <a href="#organizations" onclick="app.navigate('organizations'); return false;" id="nav-organizations" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
-          <span>Organisasi Kokurikulum</span>
-        </a>
-
-        <!-- 4. Aktiviti & Laporan Mingguan -->
-        <a href="#activities" onclick="app.navigate('activities'); return false;" id="nav-activities" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <div class="flex items-center space-x-3">
-            <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
-            <span>Aktiviti & Laporan</span>
-          </div>
-          <span id="badge-pending-activities" class="hidden text-[10px] px-1.5 py-0.5 rounded-full bg-amber-900 text-amber-300 font-bold">!</span>
-        </a>
-
-        <!-- 6. Surat Kebenaran Murid -->
-        <a href="#permission" onclick="app.navigate('permission'); return false;" id="nav-permission" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="mail" class="w-4 h-4 text-rose-400"></i>
-          <span>Surat Kebenaran</span>
-        </a>
-
-        <!-- 6. Penyertaan Luar & PAJSK -->
-        <a href="#pajsk" onclick="app.navigate('pajsk'); return false;" id="nav-pajsk" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="trophy" class="w-4 h-4 text-yellow-400"></i>
-          <span>Penyertaan & PAJSK</span>
-        </a>
-
-        <!-- 7. Kejohanan Sukan Sekolah -->
-        <a href="#sports-day" onclick="app.navigate('sports_day'); return false;" id="nav-sports-day" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="medal" class="w-4 h-4 text-amber-400"></i>
-          <span>Kejohanan Sukan Sekolah</span>
-        </a>
-
-        <!-- 8. Kejohanan Merentas Desa -->
-        <a href="#cross-country" onclick="app.navigate('cross_country'); return false;" id="nav-cross-country" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="footprints" class="w-4 h-4 text-emerald-400"></i>
-          <span>Kejohanan Merentas Desa</span>
-        </a>
-
-        <p class="px-3 pt-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Dokumen & Sistem</p>
-
-        <!-- 8. Pusat Laporan dan Cetakan -->
-        <a href="#reports" onclick="app.navigate('reports'); return false;" id="nav-reports" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="printer" class="w-4 h-4 text-indigo-400"></i>
-          <span>Pusat Laporan & Cetak</span>
-        </a>
-
-        <!-- 9. Tetapan Sistem -->
-        <a href="#settings" onclick="app.navigate('settings'); return false;" id="nav-settings" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
-          <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
-          <span>Tetapan Sistem</span>
-        </a>
-      </div>
-
-      <!-- Bottom Sidebar: Quick School Meta -->
-      <div class="p-3 bg-slate-950/60 border-t border-slate-800">
-        <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/40 text-center">
-          <div class="text-[11px] font-bold text-slate-200">SK SUNGAI DENDANG</div>
-          <div class="text-[9px] text-slate-400 font-medium mt-0.5">Selama, Perak Darul Ridzuan</div>
-          <div class="text-[9px] text-blue-400 font-semibold mt-1">Sistem Pengurusan Kokurikulum v1.0</div>
+          <!-- Logout Button (Prominent Red Button) -->
+          <button onclick="app.logout()" title="Log Keluar Sistem" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold rounded-xl text-xs transition shadow-sm hover:shadow-md cursor-pointer flex-shrink-0">
+            <i data-lucide="log-out" class="w-4 h-4 text-white"></i>
+            <span>Log Keluar</span>
+          </button>
         </div>
       </div>
-    </aside>
+    </header>
 
-    <!-- Sidebar Backdrop for Mobile -->
-    <div id="sidebar-backdrop" onclick="app.toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-10 hidden lg:hidden"></div>
-
-    <!-- Main Content Area -->
-    <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <!-- ========================================================= -->
+    <!-- 2. MAIN LAYOUT (Sidebar + Content Workspace)              -->
+    <!-- ========================================================= -->
+    <div class="flex flex-1 overflow-hidden relative">
       
-      <!-- ========================================== -->
-      <!-- VIEW 1: DASHBOARD UTAMA                    -->
-      <!-- ========================================== -->
-      <div id="view-dashboard" class="space-y-6">
+      <!-- Sidebar Navigation -->
+      <aside id="sidebar" class="fixed inset-y-0 left-0 z-20 w-64 bg-slate-900 text-slate-200 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto transition-transform duration-200 ease-in-out flex flex-col justify-between shadow-xl lg:shadow-none">
+        <div class="py-4 px-3 space-y-1 overflow-y-auto">
+          <!-- School Brand Header in Sidebar for Mobile -->
+          <div class="px-3 py-2 mb-3 bg-slate-800/80 rounded-xl border border-slate-700/50 flex items-center space-x-3 lg:hidden">
+            <img src="/static/images/school_logo.png" alt="Logo" class="w-8 h-8 object-contain">
+            <div>
+              <div class="text-xs font-bold text-white uppercase">SK Sungai Dendang</div>
+              <div class="text-[10px] text-slate-400">Unit Kokurikulum</div>
+            </div>
+          </div>
+
+          <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Modul Utama</p>
+
+          <!-- 1. Dashboard Utama -->
+          <a href="#dashboard" onclick="app.navigate('dashboard'); return false;" id="nav-dashboard" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-400"></i>
+            <span>Dashboard Utama</span>
+          </a>
+
+          <!-- 2. Pengurusan Maklumat Murid -->
+          <a href="#students" onclick="app.navigate('students'); return false;" id="nav-students" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
+              <span>Maklumat Murid</span>
+            </div>
+            <span id="badge-student-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-bold">0</span>
+          </a>
+
+          <!-- 3. Pengurusan Organisasi Kokurikulum -->
+          <a href="#organizations" onclick="app.navigate('organizations'); return false;" id="nav-organizations" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+            <span>Organisasi Kokurikulum</span>
+          </a>
+
+          <!-- 4. Aktiviti & Laporan Mingguan -->
+          <a href="#activities" onclick="app.navigate('activities'); return false;" id="nav-activities" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
+              <span>Aktiviti & Laporan</span>
+            </div>
+            <span id="badge-pending-activities" class="hidden text-[10px] px-1.5 py-0.5 rounded-full bg-amber-900 text-amber-300 font-bold">!</span>
+          </a>
+
+          <!-- 6. Surat Kebenaran Murid -->
+          <a href="#permission" onclick="app.navigate('permission'); return false;" id="nav-permission" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="mail" class="w-4 h-4 text-rose-400"></i>
+            <span>Surat Kebenaran</span>
+          </a>
+
+          <!-- 6. Penyertaan Luar & PAJSK -->
+          <a href="#pajsk" onclick="app.navigate('pajsk'); return false;" id="nav-pajsk" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="trophy" class="w-4 h-4 text-yellow-400"></i>
+            <span>Penyertaan & PAJSK</span>
+          </a>
+
+          <!-- 7. Kejohanan Sukan Sekolah -->
+          <a href="#sports-day" onclick="app.navigate('sports_day'); return false;" id="nav-sports-day" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="medal" class="w-4 h-4 text-amber-400"></i>
+            <span>Kejohanan Sukan Sekolah</span>
+          </a>
+
+          <!-- 8. Kejohanan Merentas Desa -->
+          <a href="#cross-country" onclick="app.navigate('cross_country'); return false;" id="nav-cross-country" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="footprints" class="w-4 h-4 text-emerald-400"></i>
+            <span>Kejohanan Merentas Desa</span>
+          </a>
+
+          <p class="px-3 pt-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Dokumen & Sistem</p>
+
+          <!-- 8. Pusat Laporan dan Cetakan -->
+          <a href="#reports" onclick="app.navigate('reports'); return false;" id="nav-reports" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="printer" class="w-4 h-4 text-indigo-400"></i>
+            <span>Pusat Laporan & Cetak</span>
+          </a>
+
+          <!-- 9. Tetapan Sistem -->
+          <a href="#settings" onclick="app.navigate('settings'); return false;" id="nav-settings" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition">
+            <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+            <span>Tetapan Sistem</span>
+          </a>
+        </div>
+
+        <!-- Bottom Sidebar: Profile, Logout & Quick School Meta -->
+        <div class="p-3 bg-slate-950/60 border-t border-slate-800 space-y-2">
+          <!-- Profil & Tukar ID / Password -->
+          <button type="button" onclick="app.openMyProfileModal()" title="Kemaskini ID Pengguna & Kata Laluan" class="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer">
+            <i data-lucide="user-cog" class="w-4 h-4"></i>
+            <span>Profil & Tukar ID / Password</span>
+          </button>
+
+          <!-- Log Keluar Button in Sidebar -->
+          <button onclick="app.logout()" title="Log Keluar Sistem" class="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span>Log Keluar Sistem</span>
+          </button>
+          <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/40 text-center">
+            <div class="text-[11px] font-bold text-slate-200">SK SUNGAI DENDANG</div>
+            <div class="text-[9px] text-slate-400 font-medium mt-0.5">Selama, Perak Darul Ridzuan</div>
+            <div class="text-[9px] text-blue-400 font-semibold mt-1">Sistem Pengurusan Kokurikulum v1.0</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Sidebar Backdrop for Mobile -->
+      <div id="sidebar-backdrop" onclick="app.toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-10 hidden lg:hidden"></div>
+
+      <!-- Main Content Area -->
+      <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD UTAMA                    -->
+        <!-- ========================================== -->
+        <div id="view-dashboard" class="space-y-6 hidden">
         <!-- Welcome Banner -->
         <div class="bg-gradient-to-r from-navy-900 via-navy-800 to-blue-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
           <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(#60a5fa_1px,transparent_1px)] [background-size:16px_16px] opacity-15"></div>
@@ -672,18 +766,12 @@
             <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Pilih Kelas</label>
             <select id="filter-pajsk-class" onchange="app.onPajskFilterChange()" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-navy-600 font-semibold text-slate-800">
               <option value="">Semua Kelas</option>
-              <option value="1 Arif">1 Arif</option>
-              <option value="1 Bestari">1 Bestari</option>
-              <option value="2 Cerdik">2 Cerdik</option>
-              <option value="2 Dedikasi">2 Dedikasi</option>
-              <option value="3 Amanah">3 Amanah</option>
-              <option value="3 Bakti">3 Bakti</option>
-              <option value="4 Cemerlang">4 Cemerlang</option>
-              <option value="4 Dinamik">4 Dinamik</option>
-              <option value="5 Efektif">5 Efektif</option>
-              <option value="5 Fikir">5 Fikir</option>
-              <option value="6 Gemilang">6 Gemilang</option>
-              <option value="6 Harapan">6 Harapan</option>
+              <option value="1 UM">1 UM</option>
+              <option value="2 UKM">2 UKM</option>
+              <option value="3 UPM">3 UPM</option>
+              <option value="4 USM">4 USM</option>
+              <option value="5 UTM">5 UTM</option>
+              <option value="6 UITM">6 UITM</option>
             </select>
           </div>
           <div class="w-48">
@@ -1101,7 +1189,7 @@
           </div>
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2">
-            <button type="button" onclick="app.deleteCurrentEventResults()" class="px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition">
+            <button type="button" id="btn-delete-event-results" onclick="app.deleteCurrentEventResults()" class="px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
               <span>Padam Keputusan Acara Ini</span>
             </button>
@@ -1421,13 +1509,165 @@
             </div>
           </div>
         </div>
+
+        <!-- PENGURUSAN GURU & AKAUN PENGGUNA (PENDAFTARAN & RESET PASSWORD) -->
+        <div class="glass-card p-6 rounded-2xl space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800 flex items-center">
+                <i data-lucide="user-check" class="w-4 h-4 mr-2 text-navy-800"></i>
+                Pengurusan Guru & Akaun Pengguna
+              </h3>
+              <p class="text-xs text-slate-500">Admin, GPK Kokurikulum, dan Setiausaha Kokurikulum boleh mendaftar nama guru baharu dan menetapkan semula kata laluan (Default: <b>aba6038</b>).</p>
+            </div>
+            <button onclick="app.openRegisterTeacherModal()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm transition">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              <span>+ Daftar Nama Guru / Pengguna</span>
+            </button>
+          </div>
+
+          <!-- PENDING APPROVAL REQUESTS SECTION (Admin & GPK Koko) -->
+          <div id="settings-pending-approval-container" class="p-4 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-3 hidden">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="p-1.5 bg-amber-500 text-white rounded-lg"><i data-lucide="bell-ring" class="w-4 h-4"></i></span>
+                <div>
+                  <h4 class="text-xs font-bold text-amber-950 uppercase tracking-wide">Permohonan Pendaftaran Guru Baharu Menunggu Kelulusan</h4>
+                  <p class="text-[11px] text-amber-800">Admin dan GPK Kokurikulum perlu mengesahkan & meluluskan ID guru sebelum mereka boleh log masuk.</p>
+                </div>
+              </div>
+              <span id="pending-approval-count-badge" class="px-2.5 py-1 bg-amber-600 text-white text-[11px] font-black rounded-full shadow-2xs">0 Permohonan</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-amber-200 bg-white">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-amber-100/60 text-amber-950 font-bold border-b border-amber-200 text-[11px]">
+                  <tr>
+                    <th class="p-2.5">Nama Guru</th>
+                    <th class="p-2.5">ID Pengguna</th>
+                    <th class="p-2.5">Emel & Telefon</th>
+                    <th class="p-2.5">Kategori / Unit</th>
+                    <th class="p-2.5">Tarikh Mohon</th>
+                    <th class="p-2.5 text-center">Tindakan Kelulusan</th>
+                  </tr>
+                </thead>
+                <tbody id="settings-pending-users-table-body" class="divide-y divide-amber-100">
+                  <!-- Dynamic JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Users Table -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left text-xs table-custom">
+              <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 text-[11px]">
+                <tr>
+                  <th class="p-3">Nama Guru / Pengguna</th>
+                  <th class="p-3">ID Pengguna</th>
+                  <th class="p-3">Peranan</th>
+                  <th class="p-3">Emel & Telefon</th>
+                  <th class="p-3">Kategori / Unit</th>
+                  <th class="p-3 text-center">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="settings-users-table-body" class="divide-y divide-slate-100">
+                <!-- Injected dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </main>
   </div>
+  </div> <!-- /#app-workspace -->
 
   <!-- ========================================================= -->
   <!-- 3. INTERACTIVE MODALS CONTAINER                           -->
   <!-- ========================================================= -->
+
+  <!-- MODAL: DAFTAR / KEMASKINI GURU & PENGGUNA -->
+  <div id="modal-user" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95">
+      <div class="p-4 sm:p-5 bg-navy-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="user-cog" class="w-5 h-5 text-emerald-400"></i>
+          <div>
+            <h3 id="modal-user-title" class="text-sm font-bold">Daftar Guru / Pengguna Baharu</h3>
+            <p class="text-[11px] text-blue-200">Pendaftaran nama guru, penetapan peranan dan akaun sistem</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('modal-user')" class="text-slate-300 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-user" onsubmit="app.handleSaveUserForm(event)" class="p-5 space-y-3.5 text-xs">
+        <input type="hidden" id="user-form-id">
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Nama Penuh Guru *</label>
+          <input type="text" id="user-form-fullname" required placeholder="cth: Cikgu Nor Azlan bin Mohamad" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-navy-600">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">ID Pengguna (Username) *</label>
+            <input type="text" id="user-form-username" required placeholder="cth: azlan / cikgu_azlan" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Peranan Pengguna *</label>
+            <select id="user-form-role" required class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none bg-white font-semibold">
+              <option value="Guru Penasihat">Guru Penasihat / Pemimpin</option>
+              <option value="Penyelaras Kokurikulum">Penyelaras Kokurikulum</option>
+              <option value="Setiausaha Kokurikulum">Setiausaha Kokurikulum</option>
+              <option value="GPK Kokurikulum">GPK Kokurikulum</option>
+              <option value="Admin">Admin (Pentadbir Sistem)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Emel Rasmi</label>
+            <input type="email" id="user-form-email" placeholder="cth: azlan@moe.edu.my" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">No. Telefon</label>
+            <input type="text" id="user-form-phone" placeholder="cth: 019-1234567" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Kategori / Unit Dipegang (Pilihan)</label>
+          <select id="user-form-category" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none bg-white">
+            <option value="">-- Tiada Kategori Khusus (Semua) --</option>
+            <option value="Unit Beruniform">Unit Beruniform</option>
+            <option value="Kelab & Persatuan">Kelab & Persatuan</option>
+            <option value="Sukan & Permainan">Sukan & Permainan</option>
+            <option value="Rumah Sukan">Rumah Sukan</option>
+          </select>
+        </div>
+
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+          <label class="block font-bold text-amber-950 uppercase text-[11px]">Kata Laluan Lalai (Default Password)</label>
+          <div class="flex items-center space-x-2">
+            <input type="text" id="user-form-password" value="aba6038" placeholder="aba6038" class="flex-1 py-1.5 px-3 bg-white border border-amber-300 rounded-lg text-xs font-mono font-bold text-amber-900">
+            <span class="text-[10px] text-amber-800">Default: <b>aba6038</b></span>
+          </div>
+          <p class="text-[10px] text-amber-700 leading-tight">Kata laluan lalai ialah <b>aba6038</b>. Guru boleh menukar kata laluan atau direset semula pada bila-bila masa.</p>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-200">
+          <button type="button" onclick="app.closeModal('modal-user')" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl">Batal</button>
+          <button type="submit" class="px-5 py-2 bg-navy-800 hover:bg-navy-900 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-sm">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span id="btn-save-user-text">Simpan & Daftar Guru</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL: ADD / EDIT STUDENT -->
   <div id="modal-student" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -1438,27 +1678,27 @@
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <form id="form-student" onsubmit="app.saveStudent(event)" class="p-5 overflow-y-auto space-y-4 text-xs">
+      <form id="form-student" novalidate onsubmit="app.saveStudent(event)" class="p-5 overflow-y-auto space-y-4 text-xs">
         <input type="hidden" id="student-form-id">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="sm:col-span-2">
-            <label class="block font-bold text-slate-700 uppercase mb-1">Nama Penuh Murid *</label>
-            <input type="text" id="student-name" required placeholder="cth: MUHAMMAD AIMAN BIN ABDULLAH" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-navy-600 uppercase">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Nama Penuh Murid</label>
+            <input type="text" id="student-name" placeholder="cth: MUHAMMAD AIMAN BIN ABDULLAH" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-navy-600 uppercase">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">No. Kad Pengenalan / MyKid *</label>
-            <input type="text" id="student-ic" required placeholder="cth: 140515085123" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-navy-600">
+            <label class="block font-bold text-slate-700 uppercase mb-1">No. Kad Pengenalan / MyKid</label>
+            <input type="text" id="student-ic" placeholder="cth: 140515085123" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-navy-600">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Jantina *</label>
-            <select id="student-gender" required class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Jantina</label>
+            <select id="student-gender" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
               <option value="Lelaki">Lelaki</option>
               <option value="Perempuan">Perempuan</option>
             </select>
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Tahun Persekolahan *</label>
-            <select id="student-grade" required onchange="app.updateClassDropdown(this.value)" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Tahun Persekolahan</label>
+            <select id="student-grade" onchange="app.updateClassDropdown(this.value)" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
               <option value="1">Tahun 1</option>
               <option value="2">Tahun 2</option>
               <option value="3">Tahun 3</option>
@@ -1468,8 +1708,8 @@
             </select>
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Nama Kelas *</label>
-            <select id="student-class" required class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Nama Kelas</label>
+            <select id="student-class" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
               <!-- Dynamically filled -->
             </select>
           </div>
@@ -1543,14 +1783,14 @@
         <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 space-y-2">
           <div class="font-bold flex items-center">
             <i data-lucide="info" class="w-4 h-4 mr-1 text-blue-700"></i>
-            Panduan Import Fail
+            Panduan Import Fail (Templat SKSD & APDM/SPS)
           </div>
           <p class="text-[11px] leading-relaxed">
-            Sila muat turun templat Excel rasmi SK Sungai Dendang terlebih dahulu. Pastikan ruangan Nama Penuh dan No KP diisi dengan tepat.
+            Sistem menyokong fail <b>Templat Excel SKSD</b> serta fail eksport <b>APDM / SPS</b>. Pastikan ruangan <b>Nama Penuh</b> dan <b>No KP / MyKid</b> diisi. Ruangan lain seperti Jantina, Kelas, dan Unit Kokurikulum akan dipetakan secara automatik.
           </p>
           <a href="/api/students/template/excel" class="inline-flex items-center text-xs font-bold text-blue-700 hover:underline">
             <i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i>
-            Muat Turun Templat Excel (.xlsx)
+            Muat Turun Templat Excel Rasmi (.xlsx)
           </a>
         </div>
 
@@ -1729,6 +1969,103 @@
 
       <div id="manage-org-body" class="p-5 overflow-y-auto space-y-6 text-xs">
         <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH AHLI MURID KE ORGANISASI (DENGAN PILIHAN KELAS & SEKATAN UNIT LAIN) -->
+  <div id="modal-add-org-member" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+      <!-- Header -->
+      <div class="p-4 sm:p-5 bg-navy-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>Tambah Ahli:</span>
+              <span id="add-member-org-name" class="text-amber-300">...</span>
+              <span id="add-member-org-badge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-800 text-emerald-100">...</span>
+            </h3>
+            <p id="add-member-org-subtitle" class="text-xs text-blue-200">Pilih murid mengikut kelas untuk didaftarkan ke dalam unit ini</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('modal-add-org-member')" class="text-slate-300 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Filter & Search Toolbar -->
+      <div class="p-4 bg-slate-50 border-b border-slate-200 space-y-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Class Filter Dropdown -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-600"></i>
+              <span>Pilih Mengikut Kelas:</span>
+            </label>
+            <select id="add-member-class-filter" onchange="app.renderAddMemberStudentsList()" class="w-full py-1.5 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs">
+              <option value="">-- Semua Kelas --</option>
+            </select>
+          </div>
+
+          <!-- Search Input -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-blue-600"></i>
+              <span>Cari Nama / No. KP:</span>
+            </label>
+            <div class="relative">
+              <input type="text" id="add-member-search-input" oninput="app.renderAddMemberStudentsList()" placeholder="Taip nama atau No. KP..." class="w-full py-1.5 pl-7 pr-2.5 bg-white border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Legend & Quick Action Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/80 text-[11px]">
+          <div class="flex flex-wrap items-center gap-2.5 text-slate-600">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+              <span>Boleh Dipilih</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5" title="Murid yang telah berdaftar di unit lain warnanya lebih gelap dan keluar tetingkap maklumat apabila kursor diletakkan dekat namanya.">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span>
+              <span>Unit Lain (Gelap / Disekat)</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+              <span>Ahli Sedia Ada</span>
+            </span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="app.toggleSelectAllAddMember(true)" class="text-blue-700 hover:text-blue-900 font-bold hover:underline">Pilih Semua Layak</button>
+            <span class="text-slate-300">|</span>
+            <button type="button" onclick="app.toggleSelectAllAddMember(false)" class="text-slate-600 hover:text-slate-900 font-semibold hover:underline">Nyahpilih</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student List Scrollable Area -->
+      <div id="add-member-students-container" class="p-3 sm:p-4 overflow-y-auto max-h-[48vh] space-y-1.5 bg-slate-50/50">
+        <!-- Injected dynamically via JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <div class="text-xs text-slate-600">
+          <span id="add-member-selected-count" class="font-bold text-emerald-700">0</span> murid dipilih
+        </div>
+        <div class="flex items-center space-x-2">
+          <button type="button" onclick="app.closeModal('modal-add-org-member')" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition">
+            Batal
+          </button>
+          <button type="button" id="btn-submit-add-members" onclick="app.submitAddOrgMembers()" class="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg flex items-center space-x-1.5 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>Daftar Ahli Terpilih</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1969,12 +2306,20 @@
           </div>
         </div>
 
-        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-200">
-          <button type="button" onclick="app.closeModal('modal-activity')" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl">Batal</button>
-          <button type="submit" class="px-4 py-2 bg-navy-800 hover:bg-navy-900 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-sm">
-            <i data-lucide="save" class="w-4 h-4"></i>
-            <span>Simpan Laporan & Kehadiran</span>
-          </button>
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+          <div>
+            <button type="button" id="btn-delete-activity-modal" onclick="app.deleteActivityFromModal()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold rounded-xl text-xs flex items-center space-x-1.5 transition hidden">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>Padam Laporan</span>
+            </button>
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button type="button" onclick="app.closeModal('modal-activity')" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Batal</button>
+            <button type="submit" class="px-4 py-2 bg-navy-800 hover:bg-navy-900 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-sm text-xs">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Simpan Laporan & Kehadiran</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -2018,8 +2363,52 @@
             <input type="text" id="let-form-transport" placeholder="cth: Bas Sekolah Khas / Kereta Guru" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Guru Pengiring</label>
-            <input type="text" id="let-form-teachers" placeholder="cth: En. Shahril & En. Zulkifli" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Peringkat Penyertaan (PAJSK) *</label>
+            <select id="let-form-level" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none font-bold text-navy-900 bg-white">
+              <option value="Zon">Zon</option>
+              <option value="Daerah" selected>Daerah</option>
+              <option value="Negeri">Negeri</option>
+              <option value="Kebangsaan">Kebangsaan</option>
+              <option value="Antarabangsa">Antarabangsa</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Kategori Aktiviti (PAJSK) *</label>
+            <select id="let-form-category" onchange="app.filterLetterOrgDropdown(this.value)" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none bg-white">
+              <option value="Sukan & Permainan" selected>Sukan & Permainan</option>
+              <option value="Unit Beruniform">Unit Beruniform</option>
+              <option value="Kelab & Persatuan">Kelab & Persatuan</option>
+              <option value="Lain-lain">Lain-lain</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Organisasi / Pasukan Terlibat</label>
+            <select id="let-form-org" class="w-full py-2 px-3 border border-slate-300 rounded-xl outline-none bg-white">
+              <option value="">-- Pilihan Pasukan / Organisasi --</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block font-bold text-slate-700 uppercase text-xs flex items-center gap-1.5">
+                <i data-lucide="user-check" class="w-4 h-4 text-blue-600"></i>
+                <span>Pilihan Guru Pengiring (Maksimum 3 Cikgu) *</span>
+              </label>
+              <span id="let-teachers-counter" class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                0 / 3 dipilih
+              </span>
+            </div>
+            
+            <!-- Selected Teachers Tags Display -->
+            <div id="let-selected-teachers-tags" class="flex flex-wrap gap-1.5 min-h-[38px] p-2 bg-slate-50 border border-slate-200 rounded-xl mb-2 items-center">
+              <span class="text-xs text-slate-400 italic">Sila tandakan nama guru pengiring di bawah (maksimum 3 cikgu).</span>
+            </div>
+            
+            <input type="hidden" id="let-form-teachers" name="accompanying_teachers" required>
+
+            <!-- Quick Teacher Selection List -->
+            <div class="bg-white border border-slate-200 rounded-xl p-2.5 max-h-36 overflow-y-auto space-y-1" id="let-teachers-list-container">
+              <!-- Populated dynamically from state.teachers -->
+            </div>
           </div>
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Bayaran / Yuran (RM)</label>
@@ -2135,10 +2524,10 @@
             <input type="radio" name="letter_print_format" value="health" onchange="app.toggleLetterStudentFilter(this.value)" class="mt-0.5 text-blue-600 focus:ring-blue-500">
             <div class="ml-3 flex-1">
               <div class="font-bold text-navy-950 flex items-center justify-between">
-                <span>3. Format Kebenaran Waris & Akuan Kesihatan</span>
-                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">Kesihatan & Rawatan</span>
+                <span>3. Format Surat Kebenaran Ibu Bapa (Contoh Rasmi Docx)</span>
+                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">2 Salinan / A4 Landscape</span>
               </div>
-              <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">Format gabungan kebenaran menyertai aktiviti berserta borang deklarasi/akuan kesihatan murid (asma, jantung, alahan makanan/ubat).</div>
+              <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">Format rasmi surat kebenaran ibu bapa / penjaga (2 salinan dalam 1 helaian A4 Landscape berserta pelepasan tanggungan & akuan takaful).</div>
             </div>
           </label>
         </div>
@@ -2228,6 +2617,27 @@
               + Tambah Murid
             </button>
           </div>
+
+          <!-- Pilihan Pencapaian Berkumpulan / Pasukan -->
+          <div class="p-2.5 bg-blue-50/80 border border-blue-200 rounded-xl mb-2.5 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-1.5">
+              <i data-lucide="users" class="w-4 h-4 text-blue-700"></i>
+              <span class="font-bold text-navy-900 text-xs">Pencapaian Pasukan / Berkumpulan:</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <select id="pajsk-batch-achievement" class="py-1 px-2.5 border border-blue-300 rounded-lg text-xs font-bold text-navy-900 bg-white outline-none">
+                <option value="Johan">Johan / Pingat Emas</option>
+                <option value="Naib Johan">Naib Johan / Pingat Perak</option>
+                <option value="Tempat Ketiga">Tempat Ketiga / Pingat Gangsa</option>
+                <option value="Saguhati">Saguhati</option>
+                <option value="Penyertaan" selected>Penyertaan Sahaja</option>
+              </select>
+              <button type="button" onclick="app.applyBatchPajskAchievement()" class="px-3 py-1 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center space-x-1 shadow-sm transition">
+                <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                <span>Guna Pada Semua Murid</span>
+              </button>
+            </div>
+          </div>
           <div class="border border-slate-200 rounded-xl overflow-hidden max-h-56 overflow-y-auto">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-100 font-bold sticky top-0">
@@ -2268,7 +2678,7 @@
             <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
             <span>Muat Turun Excel</span>
           </button>
-          <button onclick="window.print()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-md transition">
+          <button onclick="app.printCurrentDocument()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-md transition">
             <i data-lucide="printer" class="w-4 h-4"></i>
             <span>Cetak Sekarang (A4)</span>
           </button>
@@ -2648,7 +3058,7 @@
       </div>
 
       <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <button type="button" onclick="app.deleteCrossCountryCategoryResults(document.getElementById('cc-record-category-select').value)" class="px-3.5 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 transition">
+        <button type="button" id="btn-delete-crosscountry-modal" onclick="app.deleteCrossCountryCategoryResults(document.getElementById('cc-record-category-select').value)" class="px-3.5 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 transition">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
           <span>Padam / Kosongkan Kategori Ini</span>
         </button>
@@ -2771,8 +3181,172 @@
     </div>
   </div>
 
+  <!-- MODAL: KEMASKINI PROFIL PENGGUNA & TUKAR KATA LALUAN -->
+  <div id="modal-my-profile" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95">
+      <div class="p-4 sm:p-5 bg-navy-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-300">
+            <i data-lucide="user-cog" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold">Profil Saya & Tukar Kata Laluan</h3>
+            <p class="text-[11px] text-blue-200">Kemaskini ID pengguna, maklumat diri dan kata laluan</p>
+          </div>
+        </div>
+        <button type="button" onclick="app.closeModal('modal-my-profile')" class="text-slate-300 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-my-profile" onsubmit="app.handleSaveMyProfile(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Peranan Semasa</label>
+          <input type="text" id="my-profile-role" disabled class="w-full py-2 px-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-bold uppercase cursor-not-allowed">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">ID Pengguna (Username) <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="at-sign" class="w-4 h-4"></i>
+            </div>
+            <input type="text" id="my-profile-username" required placeholder="Masukkan ID pengguna unik" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1">Anda boleh menukar ID ini untuk digunakan semasa log masuk seterusnya.</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Nama Penuh <span class="text-rose-500">*</span></label>
+          <input type="text" id="my-profile-fullname" required placeholder="Nama penuh guru / pengguna" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">No. Telefon</label>
+            <input type="text" id="my-profile-phone" placeholder="cth: 0123456789" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Emel</label>
+            <input type="email" id="my-profile-email" placeholder="cth: guru@moe.edu.my" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+        </div>
+
+        <div class="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl space-y-2">
+          <label class="block font-bold text-navy-900 uppercase text-[11px]">Tukar Kata Laluan (Pilihan)</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </div>
+            <input type="password" id="my-profile-password" placeholder="Biarkan kosong jika tidak mahu tukar..." class="w-full pl-9 pr-9 py-2 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+            <button type="button" onclick="app.togglePasswordVisibility('my-profile-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p class="text-[10px] text-blue-700">Kata laluan lalai sistem ialah <b class="font-mono bg-blue-100 px-1 py-0.5 rounded text-blue-900">aba6038</b>.</p>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="app.closeModal('modal-my-profile')" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Batal</button>
+          <button type="submit" id="btn-save-my-profile" class="px-5 py-2 bg-navy-800 hover:bg-navy-900 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Simpan Profil</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DAFTAR AKAUN GURU BAHARU (PORTAL LOG MASUK) -->
+  <div id="modal-public-register" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95">
+      <div class="p-4 sm:p-5 bg-navy-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold">Daftar ID Guru Penasihat Baharu</h3>
+            <p class="text-[11px] text-blue-200">Borang permohonan akaun guru kokurikulum</p>
+          </div>
+        </div>
+        <button type="button" onclick="app.closeModal('modal-public-register')" class="text-slate-300 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-public-register" onsubmit="app.handlePublicRegisterSubmit(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Nama Penuh Guru <span class="text-rose-500">*</span></label>
+          <input type="text" id="reg-fullname" required placeholder="cth: Cikgu Nor Azlan bin Mohamad" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">ID Pengguna Pilihan (Username) <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="at-sign" class="w-4 h-4"></i>
+            </div>
+            <input type="text" id="reg-username" required placeholder="cth: azlan / cikgu_azlan" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Kata Laluan (Pilihan)</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </div>
+            <input type="password" id="reg-password" placeholder="Biarkan kosong untuk kata laluan default..." class="w-full pl-9 pr-9 py-2 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+            <button type="button" onclick="app.togglePasswordVisibility('reg-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">No. Telefon</label>
+            <input type="text" id="reg-phone" placeholder="cth: 019-1234567" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Emel</label>
+            <input type="email" id="reg-email" placeholder="cth: azlan@moe.edu.my" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">Kategori Unit Ditugaskan</label>
+          <select id="reg-category" class="w-full py-2 px-3 bg-white border border-slate-300 rounded-xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-navy-600">
+            <option value="Unit Beruniform">Unit Beruniform</option>
+            <option value="Kelab & Persatuan">Kelab & Persatuan</option>
+            <option value="Sukan & Permainan">Sukan & Permainan</option>
+            <option value="Rumah Sukan">Rumah Sukan</option>
+            <option value="Semua Unit">Semua Unit</option>
+          </select>
+        </div>
+
+        <!-- Approval Requirement Notice -->
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-950 flex items-start space-x-2">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <p class="text-[10px] leading-relaxed">
+            <b>Pengesahan Diperlukan:</b> Akaun yang didaftarkan perlu disahkan dan diluluskan oleh <b>Admin</b> atau <b>GPK Kokurikulum</b> sebelum boleh digunakan untuk log masuk.
+          </p>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-200">
+          <button type="button" onclick="app.closeModal('modal-public-register')" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Batal</button>
+          <button type="submit" id="btn-submit-public-register" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Hantar Permohonan</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Main JavaScript App Logic -->
-  <script src="/static/js/app.js?v=3.2"></script>
+  <script src="/static/js/app.js?v=6.2"></script>
 </body>
 </html>
 

@@ -253,9 +253,13 @@ def init_db():
         contact_person TEXT,
         contact_phone TEXT,
         special_instructions TEXT,
+        participation_level TEXT DEFAULT 'Daerah',
+        activity_category TEXT DEFAULT 'Sukan & Permainan',
+        represented_org_id INTEGER,
         academic_year TEXT DEFAULT '2026/2027',
         created_by TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (represented_org_id) REFERENCES organizations(id) ON DELETE SET NULL
     )
     """)
 
@@ -268,6 +272,7 @@ def init_db():
         permission_status TEXT DEFAULT 'Belum Diedarkan',
         parent_notes TEXT,
         response_date TEXT,
+        jersey_no TEXT DEFAULT '',
         UNIQUE(letter_id, student_id),
         FOREIGN KEY (letter_id) REFERENCES permission_letters(id) ON DELETE CASCADE,
         FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
@@ -278,6 +283,7 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS external_participations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        permission_letter_id INTEGER,
         program_name TEXT NOT NULL,
         event_date TEXT NOT NULL,
         venue TEXT NOT NULL,
@@ -294,6 +300,7 @@ def init_db():
         verified_by TEXT,
         verified_at TIMESTAMP,
         status TEXT DEFAULT 'Disahkan',
+        FOREIGN KEY (permission_letter_id) REFERENCES permission_letters(id) ON DELETE SET NULL,
         FOREIGN KEY (represented_org_id) REFERENCES organizations(id) ON DELETE SET NULL
     )
     """)
@@ -584,6 +591,43 @@ def init_db():
                 FOREIGN KEY (sport_house_id) REFERENCES organizations(id) ON DELETE CASCADE
             )
             """)
+    except Exception:
+        pass
+
+    # Ensure approval_status column exists in users table
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN approval_status TEXT DEFAULT 'approved'")
+    except Exception:
+        pass
+
+    # Ensure jersey_no column exists in permission_letter_students table
+    try:
+        cursor.execute("ALTER TABLE permission_letter_students ADD COLUMN jersey_no TEXT DEFAULT ''")
+    except Exception:
+        pass
+
+    # Update default passwords to aba6038 if using old defaults
+    try:
+        import hashlib
+        salt = "sk_sungai_dendang_koko_secret_2026"
+        default_hash = hashlib.sha256(f"aba6038_{salt}".encode()).hexdigest()
+        cursor.execute("UPDATE users SET password_hash = ? WHERE username IN ('admin', 'gpk_koko', 'su_koko', 'penyelaras_uniform', 'guru_penasihat')", (default_hash,))
+    except Exception:
+        pass
+
+    # Dynamic migrations for PAJSK sync
+    try:
+        pl_cols = [r[1] for r in cursor.execute("PRAGMA table_info(permission_letters)").fetchall()]
+        if "participation_level" not in pl_cols:
+            cursor.execute("ALTER TABLE permission_letters ADD COLUMN participation_level TEXT DEFAULT 'Daerah'")
+        if "activity_category" not in pl_cols:
+            cursor.execute("ALTER TABLE permission_letters ADD COLUMN activity_category TEXT DEFAULT 'Sukan & Permainan'")
+        if "represented_org_id" not in pl_cols:
+            cursor.execute("ALTER TABLE permission_letters ADD COLUMN represented_org_id INTEGER NULL")
+
+        ep_cols = [r[1] for r in cursor.execute("PRAGMA table_info(external_participations)").fetchall()]
+        if "permission_letter_id" not in ep_cols:
+            cursor.execute("ALTER TABLE external_participations ADD COLUMN permission_letter_id INTEGER NULL")
     except Exception:
         pass
 

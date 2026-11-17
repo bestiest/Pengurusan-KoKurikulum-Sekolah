@@ -47,13 +47,13 @@ def seed_demo_data(force: bool = False):
     )
     """)
 
-    # 2. Users (5 Distinct Roles)
+    # 2. Users (5 Distinct Roles - Default password: aba6038)
     users_data = [
-        ("admin", hash_password("admin123"), "Pentadbir Sistem (Admin)", "Admin", "admin@sksungaidendang.edu.my", "019-5551101", None, None),
-        ("gpk_koko", hash_password("gpk123"), "Pn. Siti Zaleha binti Mohd Nor", "GPK Kokurikulum", "gpk.koko@sksungaidendang.edu.my", "019-5551102", None, None),
-        ("su_koko", hash_password("su123"), "En. Mohd Faizal bin Hassan", "Setiausaha Kokurikulum", "su.koko@sksungaidendang.edu.my", "019-5551103", None, None),
-        ("penyelaras_uniform", hash_password("penyelaras123"), "Ustaz Mohd Syakir bin Othman", "Penyelaras Kokurikulum", "syakir@sksungaidendang.edu.my", "019-5551104", "Unit Beruniform", None),
-        ("guru_penasihat", hash_password("guru123"), "Cikgu Norhafizah binti Ismail", "Guru Penasihat", "norhafizah@sksungaidendang.edu.my", "019-5551105", None, "1,5,10,16")
+        ("admin", hash_password("aba6038"), "Pentadbir Sistem (Admin)", "Admin", "admin@sksungaidendang.edu.my", "019-5551101", None, None),
+        ("gpk_koko", hash_password("aba6038"), "Pn. Siti Zaleha binti Mohd Nor", "GPK Kokurikulum", "gpk.koko@sksungaidendang.edu.my", "019-5551102", None, None),
+        ("su_koko", hash_password("aba6038"), "En. Mohd Faizal bin Hassan", "Setiausaha Kokurikulum", "su.koko@sksungaidendang.edu.my", "019-5551103", None, None),
+        ("penyelaras_uniform", hash_password("aba6038"), "Ustaz Mohd Syakir bin Othman", "Penyelaras Kokurikulum", "syakir@sksungaidendang.edu.my", "019-5551104", "Unit Beruniform", None),
+        ("guru_penasihat", hash_password("aba6038"), "Cikgu Norhafizah binti Ismail", "Guru Penasihat", "norhafizah@sksungaidendang.edu.my", "019-5551105", None, "1,5,10,16")
     ]
     cursor.executemany("""
     INSERT INTO users (username, password_hash, full_name, role, email, phone, assigned_category, assigned_org_ids)
@@ -62,18 +62,12 @@ def seed_demo_data(force: bool = False):
 
     # 3. Classes (Tahun 1 hingga 6)
     classes_data = [
-        (1, "1 Cemerlang", "Pn. Salmiah binti Yusof", "2026/2027"),
-        (1, "1 Bestari", "En. Khairul Azhar bin Ramli", "2026/2027"),
-        (2, "2 Cemerlang", "Pn. Faridah binti Kassim", "2026/2027"),
-        (2, "2 Bestari", "En. Shahril bin Mansor", "2026/2027"),
-        (3, "3 Cemerlang", "Pn. Norliza binti Zakaria", "2026/2027"),
-        (3, "3 Bestari", "En. Azman bin Hashim", "2026/2027"),
-        (4, "4 Cemerlang", "Cikgu Norhafizah binti Ismail", "2026/2027"),
-        (4, "4 Bestari", "Ustaz Mohd Syakir bin Othman", "2026/2027"),
-        (5, "5 Cemerlang", "En. Mohd Faizal bin Hassan", "2026/2027"),
-        (5, "5 Bestari", "Pn. Rosnah binti Abdul Wahab", "2026/2027"),
-        (6, "6 Cemerlang", "En. Zulkifli bin Daud", "2026/2027"),
-        (6, "6 Bestari", "Pn. Hasnah binti Salleh", "2026/2027"),
+        (1, "1 UM", "Pn. Salmiah binti Yusof", "2026/2027"),
+        (2, "2 UKM", "Pn. Faridah binti Kassim", "2026/2027"),
+        (3, "3 UPM", "Pn. Norliza binti Zakaria", "2026/2027"),
+        (4, "4 USM", "Cikgu Norhafizah binti Ismail", "2026/2027"),
+        (5, "5 UTM", "En. Mohd Faizal bin Hassan", "2026/2027"),
+        (6, "6 UITM", "En. Zulkifli bin Daud", "2026/2027"),
     ]
     cursor.executemany("INSERT INTO classes (grade, class_name, class_teacher, academic_year) VALUES (?, ?, ?, ?)", classes_data)
 
@@ -138,52 +132,52 @@ def seed_demo_data(force: bool = False):
     # 6. Students Data (40 students across Grades 1-6)
     raw_students = [
         # Grade 6
-        ("MUHAMMAD DANISH IRFAN BIN ZULKIFLI", "140515085123", "2014-05-15", "Lelaki", 6, "6 Cemerlang", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang, 34140 Selama, Perak", "Tiada", 1, 5, 12, 17),
-        ("NUR AISYAH HUMAIRA BINTI AHMAD", "140820086244", "2014-08-20", "Perempuan", 6, "6 Cemerlang", "Ahmad bin Abdullah", "013-4885678", "No 45, Lorong Mawar, Rantau Panjang, Selama", "Alahan Udang", 2, 8, 10, 16),
-        ("ADAM HARITH BIN MOHD FAIZAL", "140310085431", "2014-03-10", "Lelaki", 6, "6 Cemerlang", "Mohd Faizal bin Hassan", "019-5551103", "Kuarters Guru SK Sungai Dendang, Selama", "Tiada", 3, 7, 12, 18),
-        ("SITI NURHALIZA BINTI KHAIRUL", "141125086782", "2014-11-25", "Perempuan", 6, "6 Cemerlang", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Kg Sungai Dendang", "Asma ringan (Bawa inhaler)", 4, 9, 13, 16),
-        ("MUHAMMAD AMIRUL HAKIM BIN AZMAN", "140204085519", "2014-02-04", "Lelaki", 6, "6 Cemerlang", "Azman bin Hashim", "012-3334411", "No 23, Kg Sungai Dendang Luar, Selama", "Tiada", 1, 5, 11, 19),
+        ("MUHAMMAD DANISH IRFAN BIN ZULKIFLI", "140515085123", "2014-05-15", "Lelaki", 6, "6 UITM", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang, 34140 Selama, Perak", "Tiada", 1, 5, 12, 17),
+        ("NUR AISYAH HUMAIRA BINTI AHMAD", "140820086244", "2014-08-20", "Perempuan", 6, "6 UITM", "Ahmad bin Abdullah", "013-4885678", "No 45, Lorong Mawar, Rantau Panjang, Selama", "Alahan Udang", 2, 8, 10, 16),
+        ("ADAM HARITH BIN MOHD FAIZAL", "140310085431", "2014-03-10", "Lelaki", 6, "6 UITM", "Mohd Faizal bin Hassan", "019-5551103", "Kuarters Guru SK Sungai Dendang, Selama", "Tiada", 3, 7, 12, 18),
+        ("SITI NURHALIZA BINTI KHAIRUL", "141125086782", "2014-11-25", "Perempuan", 6, "6 UITM", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Kg Sungai Dendang", "Asma ringan (Bawa inhaler)", 4, 9, 13, 16),
+        ("MUHAMMAD AMIRUL HAKIM BIN AZMAN", "140204085519", "2014-02-04", "Lelaki", 6, "6 UITM", "Azman bin Hashim", "012-3334411", "No 23, Kg Sungai Dendang Luar, Selama", "Tiada", 1, 5, 11, 19),
         
-        ("NUR DAMIA BATRISYIA BINTI ROSLAN", "140718086390", "2014-07-18", "Perempuan", 6, "6 Bestari", "Roslan bin Che Din", "014-9988112", "No 19, Kg Tebing Tinggi, Selama", "Tiada", 2, 6, 14, 16),
-        ("MUHAMMAD FARIS HAZIQ BIN KAMAL", "140909085877", "2014-09-09", "Lelaki", 6, "6 Bestari", "Kamal Ariffin bin Bakar", "019-5551115", "No 5, Kg Sungai Dendang, Selama", "Tiada", 3, 5, 10, 17),
-        ("NURUL IMAN BINTI MOHD SYAKIR", "140412086118", "2014-04-12", "Perempuan", 6, "6 Bestari", "Mohd Syakir bin Othman", "019-5551104", "Kuarters Guru SK Sungai Dendang", "Tiada", 4, 9, 13, 21),
-        ("MUHAMMAD RAYYAN MIKAIL BIN SHAHRIL", "141201085003", "2014-12-01", "Lelaki", 6, "6 Bestari", "Shahril bin Mansor", "019-5551110", "No 31, Jalan Mesra, Rantau Panjang", "Tiada", 1, 7, 12, 17),
-        ("PUTERI NUR JANNAH BINTI ZAKARIA", "140630086554", "2014-06-30", "Perempuan", 6, "6 Bestari", "Zakaria bin Idris", "013-7744332", "No 7, Kg Pondok Lalang, Selama", "Tiada", 2, 8, 15, 16),
+        ("NUR DAMIA BATRISYIA BINTI ROSLAN", "140718086390", "2014-07-18", "Perempuan", 6, "6 UITM", "Roslan bin Che Din", "014-9988112", "No 19, Kg Tebing Tinggi, Selama", "Tiada", 2, 6, 14, 16),
+        ("MUHAMMAD FARIS HAZIQ BIN KAMAL", "140909085877", "2014-09-09", "Lelaki", 6, "6 UITM", "Kamal Ariffin bin Bakar", "019-5551115", "No 5, Kg Sungai Dendang, Selama", "Tiada", 3, 5, 10, 17),
+        ("NURUL IMAN BINTI MOHD SYAKIR", "140412086118", "2014-04-12", "Perempuan", 6, "6 UITM", "Mohd Syakir bin Othman", "019-5551104", "Kuarters Guru SK Sungai Dendang", "Tiada", 4, 9, 13, 21),
+        ("MUHAMMAD RAYYAN MIKAIL BIN SHAHRIL", "141201085003", "2014-12-01", "Lelaki", 6, "6 UITM", "Shahril bin Mansor", "019-5551110", "No 31, Jalan Mesra, Rantau Panjang", "Tiada", 1, 7, 12, 17),
+        ("PUTERI NUR JANNAH BINTI ZAKARIA", "140630086554", "2014-06-30", "Perempuan", 6, "6 UITM", "Zakaria bin Idris", "013-7744332", "No 7, Kg Pondok Lalang, Selama", "Tiada", 2, 8, 15, 16),
 
         # Grade 5
-        ("AHMAD SYAMIL BIN ZULKIFLI", "150119085443", "2015-01-19", "Lelaki", 5, "5 Cemerlang", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang, Selama", "Tiada", 3, 5, 12, 17),
-        ("NUR AFRINA BALQIS BINTI HASSAN", "150522086338", "2015-05-22", "Perempuan", 5, "5 Cemerlang", "Hassan bin Basri", "011-23456789", "No 88, Kg Sungai Dendang", "Tiada", 4, 6, 10, 16),
-        ("MUHAMMAD HAFIZUDDIN BIN SALLEH", "150314085711", "2015-03-14", "Lelaki", 5, "5 Cemerlang", "Salleh bin Mat", "016-5544332", "No 14, Lorong Kenanga, Selama", "Tiada", 1, 7, 11, 20),
-        ("NUR ZULAIKHA BINTI FAIZAL", "150910086992", "2015-09-10", "Perempuan", 5, "5 Cemerlang", "Mohd Faizal bin Hassan", "019-5551103", "Kuarters Guru SK Sungai Dendang", "Tiada", 2, 8, 13, 21),
-        ("MUHAMMAD IRFAN NAJMI BIN ISMAIL", "151108085227", "2015-11-08", "Lelaki", 5, "5 Cemerlang", "Ismail bin Ibrahim", "017-8899001", "No 67, Kg Tebing Tinggi, Selama", "Alahan Kacang", 3, 5, 14, 18),
+        ("AHMAD SYAMIL BIN ZULKIFLI", "150119085443", "2015-01-19", "Lelaki", 5, "5 UTM", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang, Selama", "Tiada", 3, 5, 12, 17),
+        ("NUR AFRINA BALQIS BINTI HASSAN", "150522086338", "2015-05-22", "Perempuan", 5, "5 UTM", "Hassan bin Basri", "011-23456789", "No 88, Kg Sungai Dendang", "Tiada", 4, 6, 10, 16),
+        ("MUHAMMAD HAFIZUDDIN BIN SALLEH", "150314085711", "2015-03-14", "Lelaki", 5, "5 UTM", "Salleh bin Mat", "016-5544332", "No 14, Lorong Kenanga, Selama", "Tiada", 1, 7, 11, 20),
+        ("NUR ZULAIKHA BINTI FAIZAL", "150910086992", "2015-09-10", "Perempuan", 5, "5 UTM", "Mohd Faizal bin Hassan", "019-5551103", "Kuarters Guru SK Sungai Dendang", "Tiada", 2, 8, 13, 21),
+        ("MUHAMMAD IRFAN NAJMI BIN ISMAIL", "151108085227", "2015-11-08", "Lelaki", 5, "5 UTM", "Ismail bin Ibrahim", "017-8899001", "No 67, Kg Tebing Tinggi, Selama", "Alahan Kacang", 3, 5, 14, 18),
 
-        ("NUR SYAZWANI BINTI AZHAR", "150403086446", "2015-04-03", "Perempuan", 5, "5 Bestari", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Kg Sungai Dendang", "Tiada", 4, 9, 10, 16),
-        ("MUHAMMAD HARRAZ BIN SHAHRIZAL", "150827085335", "2015-08-27", "Lelaki", 5, "5 Bestari", "Shahrizal bin Othman", "018-9900112", "No 3, Kg Bukit Selambau, Selama", "Tiada", 1, 7, 12, 17),
-        ("NUR QISTINA ALYA BINTI NORAZAM", "151015086884", "2015-10-15", "Perempuan", 5, "5 Bestari", "Norazam bin Ariffin", "013-6655443", "No 29, Kg Sungai Dendang Hilir", "Tiada", 2, 6, 15, 21),
-        ("MUHAMMAD AQIL AQASHA BIN HAMDAN", "150606085669", "2015-06-06", "Lelaki", 5, "5 Bestari", "Hamdan bin Kassim", "019-4455667", "No 51, Jalan Besar, Selama", "Tiada", 3, 5, 11, 19),
-        ("NUR HIDAYAH BINTI MANSOR", "151219086110", "2015-12-19", "Perempuan", 5, "5 Bestari", "Mansor bin Che Mat", "012-7788990", "No 18, Kg Sungai Dendang Luar", "Tiada", 4, 8, 14, 16),
+        ("NUR SYAZWANI BINTI AZHAR", "150403086446", "2015-04-03", "Perempuan", 5, "5 UTM", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Kg Sungai Dendang", "Tiada", 4, 9, 10, 16),
+        ("MUHAMMAD HARRAZ BIN SHAHRIZAL", "150827085335", "2015-08-27", "Lelaki", 5, "5 UTM", "Shahrizal bin Othman", "018-9900112", "No 3, Kg Bukit Selambau, Selama", "Tiada", 1, 7, 12, 17),
+        ("NUR QISTINA ALYA BINTI NORAZAM", "151015086884", "2015-10-15", "Perempuan", 5, "5 UTM", "Norazam bin Ariffin", "013-6655443", "No 29, Kg Sungai Dendang Hilir", "Tiada", 2, 6, 15, 21),
+        ("MUHAMMAD AQIL AQASHA BIN HAMDAN", "150606085669", "2015-06-06", "Lelaki", 5, "5 UTM", "Hamdan bin Kassim", "019-4455667", "No 51, Jalan Besar, Selama", "Tiada", 3, 5, 11, 19),
+        ("NUR HIDAYAH BINTI MANSOR", "151219086110", "2015-12-19", "Perempuan", 5, "5 UTM", "Mansor bin Che Mat", "012-7788990", "No 18, Kg Sungai Dendang Luar", "Tiada", 4, 8, 14, 16),
 
         # Grade 4
-        ("MUHAMMAD LUQMAN HAKIM BIN RADZI", "160211085113", "2016-02-11", "Lelaki", 4, "4 Cemerlang", "Radzi bin Mahamud", "019-7711223", "No 10, Kg Sungai Dendang", "Tiada", 1, 5, 12, 17),
-        ("NUR AMALINA BINTI ZAINAL", "160429086552", "2016-04-29", "Perempuan", 4, "4 Cemerlang", "Zainal bin Abidin", "013-3344556", "No 92, Lorong Cempaka, Selama", "Tiada", 2, 8, 10, 16),
-        ("MUHAMMAD AMMAR BIN ZULKIFLI", "160714085885", "2016-07-14", "Lelaki", 4, "4 Cemerlang", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang", "Tiada", 3, 7, 11, 18),
-        ("NUR INSYIRAH BINTI SYAKIR", "160905086228", "2016-09-05", "Perempuan", 4, "4 Cemerlang", "Mohd Syakir bin Othman", "019-5551104", "Kuarters Guru SK Sungai Dendang", "Tiada", 4, 9, 13, 21),
-        ("MUHAMMAD ZAFRAN BIN KHAIRUL", "161120085447", "2016-11-20", "Lelaki", 4, "4 Cemerlang", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Selama", "Tiada", 1, 5, 14, 20),
+        ("MUHAMMAD LUQMAN HAKIM BIN RADZI", "160211085113", "2016-02-11", "Lelaki", 4, "4 USM", "Radzi bin Mahamud", "019-7711223", "No 10, Kg Sungai Dendang", "Tiada", 1, 5, 12, 17),
+        ("NUR AMALINA BINTI ZAINAL", "160429086552", "2016-04-29", "Perempuan", 4, "4 USM", "Zainal bin Abidin", "013-3344556", "No 92, Lorong Cempaka, Selama", "Tiada", 2, 8, 10, 16),
+        ("MUHAMMAD AMMAR BIN ZULKIFLI", "160714085885", "2016-07-14", "Lelaki", 4, "4 USM", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang", "Tiada", 3, 7, 11, 18),
+        ("NUR INSYIRAH BINTI SYAKIR", "160905086228", "2016-09-05", "Perempuan", 4, "4 USM", "Mohd Syakir bin Othman", "019-5551104", "Kuarters Guru SK Sungai Dendang", "Tiada", 4, 9, 13, 21),
+        ("MUHAMMAD ZAFRAN BIN KHAIRUL", "161120085447", "2016-11-20", "Lelaki", 4, "4 USM", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Selama", "Tiada", 1, 5, 14, 20),
 
-        ("NUR FARHANA BINTI SHUKOR", "160130086774", "2016-01-30", "Perempuan", 4, "4 Bestari", "Shukor bin Jamil", "011-99887766", "No 41, Kg Tebing Tinggi", "Tiada", 2, 6, 10, 16),
-        ("MUHAMMAD ADAM DANIAL BIN FAUZI", "160325085991", "2016-03-25", "Lelaki", 4, "4 Bestari", "Fauzi bin Hassan", "018-7766554", "No 25, Kg Sungai Dendang", "Tiada", 3, 7, 12, 17),
-        ("NUR HANNANI BINTI AZIZ", "160618086336", "2016-06-18", "Perempuan", 4, "4 Bestari", "Aziz bin Yusof", "014-5566778", "No 16, Jalan Mawar, Selama", "Tiada", 4, 8, 15, 18),
-        ("MUHAMMAD ARIF FAIZ BIN SAIFUL", "160809085663", "2016-08-09", "Lelaki", 4, "4 Bestari", "Saiful bin Bahari", "019-3322110", "No 34, Kg Pondok Lalang", "Tiada", 1, 5, 11, 19),
-        ("NUR AUNI MAISARAH BINTI RAZALI", "161022086448", "2016-10-22", "Perempuan", 4, "4 Bestari", "Razali bin Daud", "012-6655441", "No 59, Kg Sungai Dendang", "Tiada", 2, 9, 13, 21),
+        ("NUR FARHANA BINTI SHUKOR", "160130086774", "2016-01-30", "Perempuan", 4, "4 USM", "Shukor bin Jamil", "011-99887766", "No 41, Kg Tebing Tinggi", "Tiada", 2, 6, 10, 16),
+        ("MUHAMMAD ADAM DANIAL BIN FAUZI", "160325085991", "2016-03-25", "Lelaki", 4, "4 USM", "Fauzi bin Hassan", "018-7766554", "No 25, Kg Sungai Dendang", "Tiada", 3, 7, 12, 17),
+        ("NUR HANNANI BINTI AZIZ", "160618086336", "2016-06-18", "Perempuan", 4, "4 USM", "Aziz bin Yusof", "014-5566778", "No 16, Jalan Mawar, Selama", "Tiada", 4, 8, 15, 18),
+        ("MUHAMMAD ARIF FAIZ BIN SAIFUL", "160809085663", "2016-08-09", "Lelaki", 4, "4 USM", "Saiful bin Bahari", "019-3322110", "No 34, Kg Pondok Lalang", "Tiada", 1, 5, 11, 19),
+        ("NUR AUNI MAISARAH BINTI RAZALI", "161022086448", "2016-10-22", "Perempuan", 4, "4 USM", "Razali bin Daud", "012-6655441", "No 59, Kg Sungai Dendang", "Tiada", 2, 9, 13, 21),
 
         # Grade 3, 2, 1 (Tahap 1)
-        ("MUHAMMAD AQIL BIN ZULKIFLI", "170312085331", "2017-03-12", "Lelaki", 3, "3 Cemerlang", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang", "Tiada", 1, None, None, None),
-        ("NUR JANNAH BINTI AHMAD", "170725086882", "2017-07-25", "Perempuan", 3, "3 Cemerlang", "Ahmad bin Abdullah", "013-4885678", "No 45, Lorong Mawar", "Tiada", 2, None, None, None),
-        ("MUHAMMAD HAZIQ BIN AZMAN", "170918085223", "2017-09-18", "Lelaki", 3, "3 Bestari", "Azman bin Hashim", "012-3334411", "No 23, Kg Sungai Dendang Luar", "Tiada", 3, None, None, None),
-        ("NUR ALEEYA BINTI MOHD FAIZAL", "180215086446", "2018-02-15", "Perempuan", 2, "2 Cemerlang", "Mohd Faizal bin Hassan", "019-5551103", "Kuarters Guru SK Sungai Dendang", "Tiada", 4, None, None, None),
-        ("MUHAMMAD AMIN BIN SHAHRIL", "180830085779", "2018-08-30", "Lelaki", 2, "2 Bestari", "Shahril bin Mansor", "019-5551110", "No 31, Jalan Mesra", "Tiada", 1, None, None, None),
-        ("NUR MEDINA BINTI SYAKIR", "190510086224", "2019-05-10", "Perempuan", 1, "1 Cemerlang", "Mohd Syakir bin Othman", "019-5551104", "Kuarters Guru SK Sungai Dendang", "Tiada", 2, None, None, None),
-        ("MUHAMMAD FATEH BIN KHAIRUL", "191112085887", "2019-11-12", "Lelaki", 1, "1 Bestari", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Selama", "Tiada", 3, None, None, None)
+        ("MUHAMMAD AQIL BIN ZULKIFLI", "170312085331", "2017-03-12", "Lelaki", 3, "3 UPM", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang", "Tiada", 1, None, None, None),
+        ("NUR JANNAH BINTI AHMAD", "170725086882", "2017-07-25", "Perempuan", 3, "3 UPM", "Ahmad bin Abdullah", "013-4885678", "No 45, Lorong Mawar", "Tiada", 2, None, None, None),
+        ("MUHAMMAD HAZIQ BIN AZMAN", "170918085223", "2017-09-18", "Lelaki", 3, "3 UPM", "Azman bin Hashim", "012-3334411", "No 23, Kg Sungai Dendang Luar", "Tiada", 3, None, None, None),
+        ("NUR ALEEYA BINTI MOHD FAIZAL", "180215086446", "2018-02-15", "Perempuan", 2, "2 UKM", "Mohd Faizal bin Hassan", "019-5551103", "Kuarters Guru SK Sungai Dendang", "Tiada", 4, None, None, None),
+        ("MUHAMMAD AMIN BIN SHAHRIL", "180830085779", "2018-08-30", "Lelaki", 2, "2 UKM", "Shahril bin Mansor", "019-5551110", "No 31, Jalan Mesra", "Tiada", 1, None, None, None),
+        ("NUR MEDINA BINTI SYAKIR", "190510086224", "2019-05-10", "Perempuan", 1, "1 UM", "Mohd Syakir bin Othman", "019-5551104", "Kuarters Guru SK Sungai Dendang", "Tiada", 2, None, None, None),
+        ("MUHAMMAD FATEH BIN KHAIRUL", "191112085887", "2019-11-12", "Lelaki", 1, "1 UM", "Khairul Azhar bin Ramli", "017-6229988", "No 8, Jalan Melati, Selama", "Tiada", 3, None, None, None)
     ]
 
     for st in raw_students:

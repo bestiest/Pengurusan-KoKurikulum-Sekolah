@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 from app.models import OrganizationCreate, OrganizationUpdate, CommitteeMemberAssign
 
 router = APIRouter(prefix="/api/organizations", tags=["Pengurusan Organisasi"])
@@ -216,7 +216,7 @@ async def update_organization(
 @router.delete("/{org_id}")
 async def delete_organization(
     org_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     target = conn.execute("SELECT name FROM organizations WHERE id = ?", (org_id,)).fetchone()
@@ -270,6 +270,23 @@ async def add_org_members(
     }
     col_name = category_col_map.get(org["category"])
 
+    if col_name and data.student_ids:
+        placeholders = ",".join("?" * len(data.student_ids))
+        conflicts = conn.execute(f"""
+            SELECT s.full_name, o.name as existing_org_name
+            FROM students s
+            JOIN organizations o ON s.{col_name} = o.id
+            WHERE s.id IN ({placeholders}) AND s.{col_name} != ?
+        """, (*data.student_ids, org_id)).fetchall()
+
+        if conflicts:
+            conflict_details = [f"• {c['full_name']} (Telah berdaftar di: {c['existing_org_name']})" for c in conflicts]
+            conn.close()
+            raise HTTPException(
+                status_code=400,
+                detail=f"Murid tidak boleh didaftarkan ke dalam unit berbeza bagi kategori {org['category']}:\n" + "\n".join(conflict_details)
+            )
+
     cursor = conn.cursor()
     added_count = 0
     for s_id in data.student_ids:
@@ -288,7 +305,7 @@ async def add_org_members(
 async def remove_org_member(
     org_id: int,
     student_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Penyelaras Kokurikulum", "Guru Penasihat"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     org = conn.execute("SELECT name, category FROM organizations WHERE id = ?", (org_id,)).fetchone()
@@ -346,7 +363,7 @@ async def assign_committee_member(
 async def remove_committee_member(
     org_id: int,
     student_id: int,
-    user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum", "Penyelaras Kokurikulum", "Guru Penasihat"))
+    user: Dict[str, Any] = Depends(require_deletion_roles())
 ):
     conn = get_db_connection()
     conn.execute("DELETE FROM student_committees WHERE organization_id = ? AND student_id = ?", (org_id, student_id))

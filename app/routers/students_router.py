@@ -1,15 +1,376 @@
 import io
 import csv
+import re
+import datetime
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Response, Query
 from fastapi.responses import StreamingResponse
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from app.database import get_db_connection, log_audit
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, require_roles, require_deletion_roles
 from app.models import StudentCreate, StudentUpdate, BulkAssignOrg
 
 router = APIRouter(prefix="/api/students", tags=["Pengurusan Murid"])
+
+def clean_str(val):
+    if val is None:
+        return None
+    s = str(val).strip()
+    if not s or s.lower() in ("none", "null", "nan", "-", "tiada"):
+        return None
+    return s
+
+def clean_ic(val):
+    if val is None:
+        return None
+    if isinstance(val, (int, float)):
+        val = f"{int(val)}"
+    s = str(val).strip().replace("-", "").replace(" ", "").replace(".", "")
+    if len(s) == 11 and s.isdigit():
+        s = "0" + s
+    return s.upper()
+
+def clean_gender(val, ic_number=None):
+    if val:
+        v = str(val).strip().lower()
+        if v.startswith(("l", "m")):
+            return "Lelaki"
+        if v.startswith(("p", "f", "w")):
+            return "Perempuan"
+    if ic_number and len(ic_number) == 12 and ic_number.isdigit():
+        last_digit = int(ic_number[-1])
+        return "Lelaki" if last_digit % 2 != 0 else "Perempuan"
+    return "Lelaki"
+
+def clean_birth_date(val, ic_number=None):
+    if isinstance(val, (datetime.date, datetime.datetime)):
+        return val.strftime("%Y-%m-%d")
+    if val:
+        s = str(val).strip().split(" ")[0]
+        # YYYY-MM-DD
+        m = re.match(r"^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$", s)
+        if m:
+            y, mo, d = m.groups()
+            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+        # DD/MM/YYYY or DD-MM-YYYY
+        m2 = re.match(r"^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$", s)
+        if m2:
+            d, mo, y = m2.groups()
+            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+    
+    # Fallback to IC
+    if ic_number and len(ic_number) == 12 and ic_number.isdigit():
+        yy = int(ic_number[:2])
+        mo = int(ic_number[2:4])
+        dd = int(ic_number[4:6])
+        if 1 <= mo <= 12 and 1 <= dd <= 31:
+            year = 2000 + yy if yy < 30 else 1900 + yy
+            return f"{year:04d}-{mo:02d}-{dd:02d}"
+    return None
+
+def clean_grade(val, class_name=None):
+    if val is not None:
+        try:
+            v_int = int(float(str(val).strip()))
+            if 1 <= v_int <= 6:
+                return v_int
+        except Exception:
+            pass
+        m = re.search(r"[1-6]", str(val))
+        if m:
+            return int(m.group(0))
+    if class_name:
+        m = re.search(r"[1-6]", str(class_name))
+        if m:
+            return int(m.group(0))
+    return 1
+
+def build_org_lookup(org_rows):
+    lookup = {
+        'Rumah Sukan': {},
+        'Unit Beruniform': {},
+        'Kelab & Persatuan': {},
+        'Sukan & Permainan': {},
+        'all': {}
+    }
+    for r in org_rows:
+        org_id = r["id"]
+        name = r["name"].strip()
+        cat = r["category"]
+        
+        lookup['all'][name.lower()] = org_id
+        if cat in lookup:
+            lookup[cat][name.lower()] = org_id
+            
+        clean = re.sub(r'[^a-zA-Z0-9\s]', ' ', name).lower().split()
+        for word in clean:
+            if len(word) > 2 and word not in ('rumah', 'kelab', 'persatuan', 'unit', 'badan', 'dan'):
+                if cat in lookup:
+                    lookup[cat].setdefault(word, org_id)
+                lookup['all'].setdefault(word, org_id)
+                
+    return lookup
+
+def find_org_id(query_str, category, lookup):
+    if not query_str:
+        return None
+    q = str(query_str).strip().lower()
+    cat_dict = lookup.get(category, {})
+    
+    if q in cat_dict:
+        return cat_dict[q]
+    if q in lookup['all']:
+        return lookup['all'][q]
+        
+    for name, org_id in cat_dict.items():
+        if q in name or name in q:
+            return org_id
+            
+    q_words = [w for w in re.sub(r'[^a-zA-Z0-9\s]', ' ', q).split() if len(w) > 2]
+    for w in q_words:
+        if w in cat_dict:
+            return cat_dict[w]
+    return None
+
+def detect_header_and_map(rows):
+    """
+    Scans first 15 rows to find the actual header row.
+    Returns: (header_row_index, field_map)
+    """
+    best_row_idx = 0
+    best_score = -1
+    best_map = {}
+
+    for r_idx in range(min(15, len(rows))):
+        row = rows[r_idx]
+        if not row or not any(row):
+            continue
+        
+        field_map = {}
+        score = 0
+        for c_idx, cell in enumerate(row):
+            if cell is None:
+                continue
+            c = re.sub(r'[^a-z0-9]', '', str(cell).lower())
+            if not c:
+                continue
+            
+            if any(k in c for k in ['penjaga', 'bapa', 'ibu', 'guardian']):
+                if any(k in c for k in ['tel', 'phone', 'bimbit', 'nombor', 'telefon', 'hp', 'notel']):
+                    if 'guardian_phone' not in field_map:
+                        field_map['guardian_phone'] = c_idx
+                        score += 2
+                else:
+                    if 'guardian_name' not in field_map:
+                        field_map['guardian_name'] = c_idx
+                        score += 2
+            elif any(k in c for k in ['nokp', 'mykid', 'kadpengenalan', 'suratberanak', 'sijillahir', 'icnumber', 'dokumen']) or c in ('ic', 'kp'):
+                if 'ic_number' not in field_map:
+                    field_map['ic_number'] = c_idx
+                    score += 5
+            elif 'nama' in c or 'name' in c or 'murid' in c or 'pelajar' in c:
+                if 'kelas' in c:
+                    if 'class_name' not in field_map:
+                        field_map['class_name'] = c_idx
+                        score += 2
+                else:
+                    if 'full_name' not in field_map:
+                        field_map['full_name'] = c_idx
+                        score += 5
+            elif any(k in c for k in ['tarikh', 'lahir', 'dob', 'birth']):
+                if 'birth_date' not in field_map:
+                    field_map['birth_date'] = c_idx
+                    score += 2
+            elif any(k in c for k in ['jantina', 'gender', 'sex']):
+                if 'gender' not in field_map:
+                    field_map['gender'] = c_idx
+                    score += 3
+            elif any(k in c for k in ['tingkatan', 'tahun', 'darjah', 'grade', 'year']):
+                if 'kelas' in c:
+                    if 'class_name' not in field_map:
+                        field_map['class_name'] = c_idx
+                        score += 2
+                else:
+                    if 'grade' not in field_map:
+                        field_map['grade'] = c_idx
+                        score += 2
+            elif any(k in c for k in ['kelas', 'class']):
+                if 'class_name' not in field_map:
+                    field_map['class_name'] = c_idx
+                    score += 2
+            elif any(k in c for k in ['alamat', 'address']):
+                if 'address' not in field_map:
+                    field_map['address'] = c_idx
+                    score += 1
+            elif any(k in c for k in ['kesihatan', 'alahan', 'health', 'penyakit']):
+                if 'health_info' not in field_map:
+                    field_map['health_info'] = c_idx
+                    score += 1
+            elif any(k in c for k in ['rumah', 'rumahsukan']):
+                if 'sport_house' not in field_map:
+                    field_map['sport_house'] = c_idx
+                    score += 2
+            elif any(k in c for k in ['uniform', 'badanberuniform', 'unitberuniform']):
+                if 'uniform_unit' not in field_map:
+                    field_map['uniform_unit'] = c_idx
+                    score += 2
+            elif any(k in c for k in ['kelab', 'persatuan']):
+                if 'club_society' not in field_map:
+                    field_map['club_society'] = c_idx
+                    score += 2
+            elif any(k in c for k in ['sukan', 'permainan']):
+                if 'sports_game' not in field_map:
+                    field_map['sports_game'] = c_idx
+                    score += 2
+
+        if score > best_score:
+            best_score = score
+            best_row_idx = r_idx
+            best_map = field_map
+
+    # If score is too low or missing both name and ic, fallback to positional mapping
+    if best_score < 4 or ('full_name' not in best_map and 'ic_number' not in best_map):
+        best_row_idx = 0
+        first_row = rows[0] if rows else []
+        offset = 1 if (len(first_row) > 1 and str(first_row[0]).strip().lower() in ('bil', 'no', '1')) else 0
+        best_map = {
+            'full_name': offset + 0,
+            'ic_number': offset + 1,
+            'birth_date': offset + 2,
+            'gender': offset + 3,
+            'grade': offset + 4,
+            'class_name': offset + 5,
+            'guardian_name': offset + 6,
+            'guardian_phone': offset + 7,
+            'address': offset + 8,
+            'health_info': offset + 9,
+            'sport_house': offset + 10,
+            'uniform_unit': offset + 11,
+            'club_society': offset + 12,
+            'sports_game': offset + 13
+        }
+
+    return best_row_idx, best_map
+
+def process_student_rows(rows, conn, cursor, org_lookup):
+    if not rows or len(rows) < 2:
+        return 0, 0, ["Fail tidak mempunyai data murid."]
+
+    header_row_idx, col_map = detect_header_and_map(rows)
+
+    imported_count = 0
+    updated_count = 0
+    errors = []
+
+    # Process all rows after the detected header row
+    for row_idx, r in enumerate(rows[header_row_idx + 1:], start=header_row_idx + 2):
+        if not r or not any(r):
+            continue
+        
+        # Check if entire row is just whitespace or header repetition
+        raw_vals = [str(c).strip() for c in r if c is not None and str(c).strip()]
+        if not raw_vals:
+            continue
+        if any(h in raw_vals[0].upper() for h in ['NAMA PENUH', 'NAMA MURID', 'KEMENTERIAN PENDIDIKAN', 'SENARAI NAMA']):
+            continue
+
+        try:
+            def get_col(field_name):
+                idx = col_map.get(field_name)
+                if idx is not None and idx < len(r):
+                    return r[idx]
+                return None
+
+            raw_name = get_col('full_name')
+            raw_ic = get_col('ic_number')
+
+            full_name = clean_str(raw_name)
+            if full_name:
+                full_name = " ".join(full_name.split()).upper()
+
+            ic_number = clean_ic(raw_ic)
+
+            # Check if columns might have been inverted
+            if not full_name and raw_ic and not str(raw_ic).replace("-", "").isdigit():
+                full_name = str(raw_ic).strip().upper()
+                ic_number = clean_ic(raw_name)
+
+            if not full_name or not ic_number:
+                errors.append(f"Baris {row_idx}: Nama Penuh atau No KP / MyKid kosong atau tidak lengkap.")
+                continue
+
+            # Don't import if name is header text or Bil number
+            if full_name.isdigit() or full_name in ("NAMA", "NAMA MURID", "NAMA PENUH", "BIL", "BIL."):
+                continue
+
+            gender = clean_gender(get_col('gender'), ic_number)
+            class_name = clean_str(get_col('class_name'))
+            grade = clean_grade(get_col('grade'), class_name)
+            if not class_name:
+                class_name = f"{grade} Cemerlang"
+
+            birth_date = clean_birth_date(get_col('birth_date'), ic_number)
+            guardian_name = clean_str(get_col('guardian_name'))
+            guardian_phone = clean_str(get_col('guardian_phone'))
+            if guardian_phone:
+                guardian_phone = guardian_phone.replace(" ", "").replace("-", "")
+            address = clean_str(get_col('address'))
+            health_info = clean_str(get_col('health_info')) or "Tiada"
+
+            sport_house_id = find_org_id(get_col('sport_house'), 'Rumah Sukan', org_lookup)
+            uniform_unit_id = find_org_id(get_col('uniform_unit'), 'Unit Beruniform', org_lookup)
+            club_society_id = find_org_id(get_col('club_society'), 'Kelab & Persatuan', org_lookup)
+            sports_game_id = find_org_id(get_col('sports_game'), 'Sukan & Permainan', org_lookup)
+
+            # Insert or update
+            existing = conn.execute("SELECT id FROM students WHERE ic_number = ?", (ic_number,)).fetchone()
+            if existing:
+                st_id = existing["id"]
+                cursor.execute("""
+                UPDATE students SET
+                    full_name = ?, birth_date = COALESCE(?, birth_date), gender = ?, grade = ?, class_name = ?,
+                    guardian_name = COALESCE(?, guardian_name), guardian_phone = COALESCE(?, guardian_phone),
+                    address = COALESCE(?, address), health_info = COALESCE(?, health_info),
+                    sport_house_id = COALESCE(?, sport_house_id),
+                    uniform_unit_id = COALESCE(?, uniform_unit_id),
+                    club_society_id = COALESCE(?, club_society_id),
+                    sports_game_id = COALESCE(?, sports_game_id)
+                WHERE id = ?
+                """, (
+                    full_name, birth_date, gender, grade, class_name,
+                    guardian_name, guardian_phone, address, health_info,
+                    sport_house_id, uniform_unit_id, club_society_id, sports_game_id, st_id
+                ))
+                updated_count += 1
+            else:
+                cursor.execute("""
+                INSERT INTO students (
+                    full_name, ic_number, birth_date, gender, grade, class_name,
+                    guardian_name, guardian_phone, address, health_info,
+                    sport_house_id, uniform_unit_id, club_society_id, sports_game_id,
+                    status, academic_year
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aktif', '2026/2027')
+                """, (
+                    full_name, ic_number, birth_date, gender, grade, class_name,
+                    guardian_name, guardian_phone, address, health_info,
+                    sport_house_id, uniform_unit_id, club_society_id, sports_game_id
+                ))
+                st_id = cursor.lastrowid
+                imported_count += 1
+
+            # Register memberships
+            for org_id in [sport_house_id, uniform_unit_id, club_society_id, sports_game_id]:
+                if org_id:
+                    cursor.execute("""
+                    INSERT OR IGNORE INTO organization_members (organization_id, student_id, academic_year)
+                    VALUES (?, ?, '2026/2027')
+                    """, (org_id, st_id))
+
+        except Exception as ex:
+            errors.append(f"Baris {row_idx}: Ralat memproses - {str(ex)}")
+
+    return imported_count, updated_count, errors
 
 @router.get("")
 async def list_students(
@@ -121,8 +482,8 @@ async def download_student_template():
 
     # Sample rows
     sample_data = [
-        ["MUHAMMAD DANISH IRFAN BIN ZULKIFLI", "140515085123", "2014-05-15", "Lelaki", 6, "6 Cemerlang", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang, Selama", "Tiada", "Rumah Bendahara (Merah)", "Persekutuan Pengakap Malaysia (Pengakap)", "Kelab STEM & Robotik", "Kelab Bola Sepak"],
-        ["NUR AISYAH HUMAIRA BINTI AHMAD", "140820086244", "2014-08-20", "Perempuan", 6, "6 Cemerlang", "Ahmad bin Abdullah", "013-4885678", "No 45, Lorong Mawar, Selama", "Alahan Kacang", "Rumah Temenggong (Kuning)", "Pergerakan Pandu Puteri Tunas (PPT)", "Persatuan Bahasa Melayu", "Kelab Bola Jaring"]
+        ["MUHAMMAD DANISH IRFAN BIN ZULKIFLI", "150101089991", "2015-01-01", "Lelaki", 5, "5 Cemerlang", "Zulkifli bin Daud", "012-5881234", "No 12, Kg Sungai Dendang, Selama", "Tiada", "Rumah Bendahara (Merah)", "Persekutuan Pengakap Malaysia (Pengakap)", "Kelab STEM & Robotik", "Kelab Bola Sepak"],
+        ["NUR AISYAH HUMAIRA BINTI AHMAD", "150202089992", "2015-02-02", "Perempuan", 5, "5 Cemerlang", "Ahmad bin Abdullah", "013-4885678", "No 45, Lorong Mawar, Selama", "Alahan Kacang", "Rumah Temenggong (Kuning)", "Pergerakan Pandu Puteri Tunas (PPT)", "Persatuan Bahasa Melayu", "Kelab Bola Jaring"]
     ]
 
     for row_num, row_data in enumerate(sample_data, 2):
@@ -158,148 +519,61 @@ async def import_students(
 
     # Pre-fetch organizations by name for mapping
     org_rows = conn.execute("SELECT id, name, category FROM organizations").fetchall()
-    org_map = {r["name"].strip().lower(): r["id"] for r in org_rows}
+    org_lookup = build_org_lookup(org_rows)
 
-    imported_count = 0
-    updated_count = 0
-    errors = []
-
+    rows = []
     if filename.endswith(".xlsx"):
         try:
             wb = openpyxl.load_workbook(io.BytesIO(contents), data_only=True)
             ws = wb.active
             rows = list(ws.iter_rows(values_only=True))
-            if not rows or len(rows) < 2:
-                raise HTTPException(status_code=400, detail="Fail Excel kosong atau tiada data.")
-
-            header = [str(c).strip().lower() if c else "" for c in rows[0]]
-            for idx, r in enumerate(rows[1:], start=2):
-                if not r or not any(r):
-                    continue
-                try:
-                    full_name = str(r[0]).strip().upper() if r[0] else None
-                    ic_number = str(r[1]).strip().replace("-", "").replace(" ", "") if r[1] else None
-                    birth_date = str(r[2]).strip() if len(r) > 2 and r[2] else None
-                    gender = str(r[3]).strip().capitalize() if len(r) > 3 and r[3] else "Lelaki"
-                    grade = int(r[4]) if len(r) > 4 and r[4] else 1
-                    class_name = str(r[5]).strip() if len(r) > 5 and r[5] else f"{grade} Cemerlang"
-                    guardian_name = str(r[6]).strip() if len(r) > 6 and r[6] else None
-                    guardian_phone = str(r[7]).strip() if len(r) > 7 and r[7] else None
-                    address = str(r[8]).strip() if len(r) > 8 and r[8] else None
-                    health_info = str(r[9]).strip() if len(r) > 9 and r[9] else "Tiada"
-
-                    sport_house_name = str(r[10]).strip().lower() if len(r) > 10 and r[10] else None
-                    uniform_unit_name = str(r[11]).strip().lower() if len(r) > 11 and r[11] else None
-                    club_society_name = str(r[12]).strip().lower() if len(r) > 12 and r[12] else None
-                    sports_game_name = str(r[13]).strip().lower() if len(r) > 13 and r[13] else None
-
-                    sport_house_id = org_map.get(sport_house_name)
-                    uniform_unit_id = org_map.get(uniform_unit_name)
-                    club_society_id = org_map.get(club_society_name)
-                    sports_game_id = org_map.get(sports_game_name)
-
-                    if not full_name or not ic_number:
-                        errors.append(f"Baris {idx}: Nama Penuh atau No KP kosong.")
-                        continue
-
-                    # Insert or update
-                    existing = conn.execute("SELECT id FROM students WHERE ic_number = ?", (ic_number,)).fetchone()
-                    if existing:
-                        st_id = existing["id"]
-                        cursor.execute("""
-                        UPDATE students SET
-                            full_name = ?, birth_date = ?, gender = ?, grade = ?, class_name = ?,
-                            guardian_name = ?, guardian_phone = ?, address = ?, health_info = ?,
-                            sport_house_id = COALESCE(?, sport_house_id),
-                            uniform_unit_id = COALESCE(?, uniform_unit_id),
-                            club_society_id = COALESCE(?, club_society_id),
-                            sports_game_id = COALESCE(?, sports_game_id)
-                        WHERE id = ?
-                        """, (
-                            full_name, birth_date, gender, grade, class_name,
-                            guardian_name, guardian_phone, address, health_info,
-                            sport_house_id, uniform_unit_id, club_society_id, sports_game_id, st_id
-                        ))
-                        updated_count += 1
-                    else:
-                        cursor.execute("""
-                        INSERT INTO students (
-                            full_name, ic_number, birth_date, gender, grade, class_name,
-                            guardian_name, guardian_phone, address, health_info,
-                            sport_house_id, uniform_unit_id, club_society_id, sports_game_id,
-                            status, academic_year
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aktif', '2026/2027')
-                        """, (
-                            full_name, ic_number, birth_date, gender, grade, class_name,
-                            guardian_name, guardian_phone, address, health_info,
-                            sport_house_id, uniform_unit_id, club_society_id, sports_game_id
-                        ))
-                        st_id = cursor.lastrowid
-                        imported_count += 1
-
-                    # Register memberships
-                    for org_id in [sport_house_id, uniform_unit_id, club_society_id, sports_game_id]:
-                        if org_id:
-                            cursor.execute("INSERT OR IGNORE INTO organization_members (organization_id, student_id, academic_year) VALUES (?, ?, '2026/2027')", (org_id, st_id))
-
-                except Exception as ex:
-                    errors.append(f"Baris {idx}: Ralat memproses - {str(ex)}")
-
-            conn.commit()
         except Exception as e:
             conn.close()
-            raise HTTPException(status_code=400, detail=f"Gagal membaca fail Excel: {str(e)}")
-
+            raise HTTPException(status_code=400, detail=f"Gagal membaca fail Excel (.xlsx): {str(e)}")
     elif filename.endswith(".csv"):
         try:
             csv_text = contents.decode("utf-8-sig", errors="ignore")
-            reader = csv.reader(io.StringIO(csv_text))
+            # Auto-detect delimiter
+            try:
+                sniffer = csv.Sniffer()
+                dialect = sniffer.sniff(csv_text[:2048])
+                delim = dialect.delimiter
+            except Exception:
+                delim = ","
+            reader = csv.reader(io.StringIO(csv_text), delimiter=delim)
             rows = list(reader)
-            for idx, r in enumerate(rows[1:], start=2):
-                if not r or not any(r):
-                    continue
-                try:
-                    full_name = r[0].strip().upper() if len(r) > 0 and r[0] else None
-                    ic_number = r[1].strip().replace("-", "").replace(" ", "") if len(r) > 1 and r[1] else None
-                    gender = r[3].strip().capitalize() if len(r) > 3 and r[3] else "Lelaki"
-                    grade = int(r[4]) if len(r) > 4 and r[4] else 1
-                    class_name = r[5].strip() if len(r) > 5 and r[5] else f"{grade} Cemerlang"
-                    guardian_name = r[6].strip() if len(r) > 6 and r[6] else None
-                    guardian_phone = r[7].strip() if len(r) > 7 and r[7] else None
-
-                    if not full_name or not ic_number:
-                        continue
-
-                    existing = conn.execute("SELECT id FROM students WHERE ic_number = ?", (ic_number,)).fetchone()
-                    if existing:
-                        cursor.execute("""
-                        UPDATE students SET full_name = ?, gender = ?, grade = ?, class_name = ?, guardian_name = ?, guardian_phone = ? WHERE id = ?
-                        """, (full_name, gender, grade, class_name, guardian_name, guardian_phone, existing["id"]))
-                        updated_count += 1
-                    else:
-                        cursor.execute("""
-                        INSERT INTO students (full_name, ic_number, gender, grade, class_name, guardian_name, guardian_phone, status, academic_year)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, 'Aktif', '2026/2027')
-                        """, (full_name, ic_number, gender, grade, class_name, guardian_name, guardian_phone))
-                        imported_count += 1
-                except Exception as ex:
-                    errors.append(f"Baris {idx}: {str(ex)}")
-            conn.commit()
         except Exception as e:
             conn.close()
-            raise HTTPException(status_code=400, detail=f"Gagal membaca fail CSV: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Gagal membaca fail CSV (.csv): {str(e)}")
     else:
         conn.close()
         raise HTTPException(status_code=400, detail="Format fail tidak disokong. Sila gunakan format .xlsx atau .csv.")
 
+    imported_count, updated_count, errors = process_student_rows(rows, conn, cursor, org_lookup)
+    conn.commit()
     conn.close()
-    log_audit(user.get("id"), user.get("username"), user.get("role"), "IMPORT", "STUDENTS", f"Import murid pukal: {imported_count} baharu, {updated_count} dikemas kini")
-    
+
+    log_audit(
+        user.get("id"),
+        user.get("username"),
+        user.get("role"),
+        "IMPORT",
+        "STUDENTS",
+        f"Import murid pukal: {imported_count} baharu, {updated_count} dikemas kini, {len(errors)} ralat"
+    )
+
+    total_proc = imported_count + updated_count
+    msg = f"Berjaya memproses: {imported_count} murid baharu didaftarkan, {updated_count} rekod murid dikemas kini!" if total_proc > 0 else "Tiada murid baharu didaftarkan atau dikemas kini."
+
     return {
         "status": "success",
+        "total_processed": total_proc,
+        "total_imported": total_proc,
         "imported_count": imported_count,
         "updated_count": updated_count,
-        "errors": errors
+        "errors_count": len(errors),
+        "errors": errors[:25],
+        "message": msg
     }
 
 @router.get("/export/excel")
@@ -512,13 +786,33 @@ async def export_students_excel(
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
+FIXED_CLASSES = {
+    1: "1 UM",
+    2: "2 UKM",
+    3: "3 UPM",
+    4: "4 USM",
+    5: "5 UTM",
+    6: "6 UITM"
+}
+
 @router.post("")
 async def create_student(data: StudentCreate, user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum", "Setiausaha Kokurikulum"))):
+    import time
     conn = get_db_connection()
-    existing = conn.execute("SELECT id FROM students WHERE ic_number = ?", (data.ic_number.strip(),)).fetchone()
-    if existing:
-        conn.close()
-        raise HTTPException(status_code=400, detail="Nombor Kad Pengenalan / Surat Beranak telah didaftarkan.")
+    ic = (data.ic_number or "").strip()
+    if not ic:
+        # Generate temporary unique draft ID so incomplete records can still be saved
+        ic = f"DRAFT-{int(time.time() * 1000)}"
+    else:
+        existing = conn.execute("SELECT id FROM students WHERE ic_number = ?", (ic,)).fetchone()
+        if existing:
+            conn.close()
+            raise HTTPException(status_code=400, detail="Nombor Kad Pengenalan / Surat Beranak telah didaftarkan.")
+
+    grade = data.grade or 1
+    class_name = (data.class_name or "").strip() or FIXED_CLASSES.get(grade, f"{grade} UM")
+    full_name = (data.full_name or "").strip().upper() or "MURID TANPA NAMA"
+    gender = (data.gender or "").strip() or "Lelaki"
 
     cursor = conn.cursor()
     cursor.execute("""
@@ -529,16 +823,16 @@ async def create_student(data: StudentCreate, user: Dict[str, Any] = Depends(req
         status, academic_year
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        data.full_name.strip().upper(),
-        data.ic_number.strip(),
+        full_name,
+        ic,
         data.birth_date,
-        data.gender,
-        data.grade,
-        data.class_name,
+        gender,
+        grade,
+        class_name,
         data.guardian_name,
         data.guardian_phone,
         data.address,
-        data.health_info,
+        data.health_info or "Tiada",
         data.sport_house_id,
         data.uniform_unit_id,
         data.club_society_id,
@@ -702,16 +996,27 @@ async def update_student(
         conn.close()
         raise HTTPException(status_code=404, detail="Murid tidak dijumpai.")
 
+    # Duplicate IC check only if changed and non-empty
+    ic = data.ic_number.strip() if (data.ic_number and data.ic_number.strip()) else None
+    if ic and ic != existing["ic_number"]:
+        dup = conn.execute("SELECT id FROM students WHERE ic_number = ? AND id != ?", (ic, student_id)).fetchone()
+        if dup:
+            conn.close()
+            raise HTTPException(status_code=400, detail="Nombor Kad Pengenalan / Surat Beranak telah didaftarkan untuk murid lain.")
+
+    grade = data.grade if data.grade is not None else existing["grade"]
+    class_name = data.class_name.strip() if (data.class_name and data.class_name.strip()) else FIXED_CLASSES.get(grade, existing["class_name"])
+
     update_fields = []
     values = []
 
     fields_map = {
-        "full_name": data.full_name.strip().upper() if data.full_name else None,
-        "ic_number": data.ic_number.strip() if data.ic_number else None,
+        "full_name": data.full_name.strip().upper() if (data.full_name and data.full_name.strip()) else None,
+        "ic_number": ic,
         "birth_date": data.birth_date,
         "gender": data.gender,
-        "grade": data.grade,
-        "class_name": data.class_name,
+        "grade": grade,
+        "class_name": class_name,
         "guardian_name": data.guardian_name,
         "guardian_phone": data.guardian_phone,
         "address": data.address,
@@ -745,7 +1050,7 @@ async def update_student(
     return {"status": "success", "message": "Maklumat murid berjaya dikemas kini."}
 
 @router.delete("/{student_id}")
-async def delete_student(student_id: int, user: Dict[str, Any] = Depends(require_roles("Admin", "GPK Kokurikulum"))):
+async def delete_student(student_id: int, user: Dict[str, Any] = Depends(require_deletion_roles())):
     conn = get_db_connection()
     st = conn.execute("SELECT full_name FROM students WHERE id = ?", (student_id,)).fetchone()
     if not st:

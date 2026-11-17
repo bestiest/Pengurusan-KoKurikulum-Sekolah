@@ -7,7 +7,7 @@ class UserLogin(BaseModel):
 
 class UserCreate(BaseModel):
     username: str
-    password: str
+    password: Optional[str] = "aba6038"
     full_name: str
     role: str
     email: Optional[str] = None
@@ -25,17 +25,20 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     is_active: Optional[int] = 1
 
+class ResetPasswordRequest(BaseModel):
+    new_password: Optional[str] = "aba6038"
+
 class StudentCreate(BaseModel):
-    full_name: str
-    ic_number: str
+    full_name: Optional[str] = "MURID TANPA NAMA"
+    ic_number: Optional[str] = None
     birth_date: Optional[str] = None
-    gender: str
-    grade: int
-    class_name: str
+    gender: Optional[str] = "Lelaki"
+    grade: Optional[int] = 1
+    class_name: Optional[str] = None
     guardian_name: Optional[str] = None
     guardian_phone: Optional[str] = None
     address: Optional[str] = None
-    health_info: Optional[str] = "Tiada alahan / Masalah kesihatan"
+    health_info: Optional[str] = "Tiada"
     sport_house_id: Optional[int] = None
     uniform_unit_id: Optional[int] = None
     club_society_id: Optional[int] = None
@@ -181,11 +184,18 @@ class PermissionLetterCreate(BaseModel):
     contact_person: Optional[str] = None
     contact_phone: Optional[str] = None
     special_instructions: Optional[str] = None
+    participation_level: Optional[str] = "Daerah"
+    activity_category: Optional[str] = "Sukan & Permainan"
+    represented_org_id: Optional[int] = None
     student_ids: List[int] = []
 
 class PermissionStatusUpdate(BaseModel):
-    permission_status: str
+    permission_status: Optional[str] = "Belum Diedarkan"
     parent_notes: Optional[str] = None
+    jersey_no: Optional[str] = None
+
+class StudentJerseyUpdate(BaseModel):
+    jersey_no: str
 
 class ExternalParticipationStudentItem(BaseModel):
     student_id: int
