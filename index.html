@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Rasmi Sistem Kokurikulum - SK Sungai Dendang</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <img src="app/static/images/school_logo.png" alt="Logo SK Sungai Dendang" class="w-11 h-11 object-contain drop-shadow-sm">
+        <div>
+          <h1 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight leading-tight">UNIT KOKURIKULUM</h1>
+          <p class="text-xs text-slate-500 font-medium">SK Sungai Dendang, 34130 Selama, Perak (ABA6038)</p>
+        </div>
+      </div>
+      <div>
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+          Sesi 2026/2027
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <main class="max-w-5xl mx-auto px-4 py-8 sm:py-12 flex-1">
+    
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-4 shadow-xs">
+        <i data-lucide="award" class="w-3.5 h-3.5 mr-1.5 text-blue-600"></i>
+        Sistem Pengurusan Unit Kokurikulum Lengkap
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-3">
+        Sistem Pengurusan Kokurikulum & PAJSK
+      </h2>
+      <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+        Aplikasi berasaskan web komprehensif bagi pengurusan maklumat murid, penyertaan luar, markah PAJSK, janaan automatik Surat Kebenaran Waris (A4 Landscape), Kejohanan Sukan Tahunan dan Merentas Desa.
+      </p>
+    </div>
+
+    <!-- Info Box: Status GitHub Pages vs Cloud Server -->
+    <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl mb-10 relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+        <i data-lucide="server" class="w-72 h-72"></i>
+      </div>
+      
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-400 text-slate-950 mb-3">
+          <i data-lucide="info" class="w-3.5 h-3.5 mr-1"></i> Makluman Penting Hos Web
+        </div>
+        <h3 class="text-xl sm:text-2xl font-bold mb-2">Aplikasi Memerlukan Pelayan Python (FastAPI & SQLite)</h3>
+        <p class="text-blue-100 text-xs sm:text-sm leading-relaxed mb-6">
+          GitHub Pages hanya memaparkan fail statik (HTML/CSS). Bagi membolehkan pangkalan data murid, log masuk pengguna, dan simpanan rekod berfungsi, aplikasi ini menggunakan pelayan Python. Anda boleh menjalankannya secara tempatan atau hos secara percuma di Cloud (Render.com).
+        </p>
+
+        <div class="flex flex-wrap gap-3">
+          <a href="https://render.com" target="_blank" rel="noopener noreferrer" 
+             class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm hover:bg-amber-300 transition shadow-md">
+            <i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>
+            Hos Online Percuma (Render.com)
+          </a>
+          <a href="#cara-jalankan" 
+             class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition">
+            <i data-lucide="terminal" class="w-4 h-4 mr-2"></i>
+            Cara Jalankan di Komputer Sekolah
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ciri-Ciri Utama Sistem -->
+    <div class="mb-12">
+      <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center">
+        <i data-lucide="layers" class="w-5 h-5 text-blue-600 mr-2"></i>
+        Ciri-Ciri Utama Sistem
+      </h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm mb-1.5">Pengurusan Maklumat Murid</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Penyelarasan kelas tetap (1 UM, 2 UKM, 3 UPM, 4 USM, 5 UTM, 6 UITM), pendaftaran 4 unit wajib, import/eksport Excel serta semakan keahlian bertindih secara automatik.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
+            <i data-lucide="file-check" class="w-5 h-5"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm mb-1.5">Janaan Surat Kebenaran Waris</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Format rasmi A4 Landscape (sebelah kiri Surat Makluman Sekolah, sebelah kanan Borang Kebenaran Ibu Bapa). Ruangan tandatangan sekolah terbuka untuk cop GPK Ko / Guru Besar.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+            <i data-lucide="trophy" class="w-5 h-5"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm mb-1.5">Penyertaan Luar & PAJSK</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Perekodan automatik kontinjen aktiviti luar serentak dengan janaan surat kebenaran, penilaian gred PAJSK mengikut peringkat serta laporan pencapaian individu.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4">
+            <i data-lucide="flag" class="w-5 h-5"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm mb-1.5">Kejohanan Sukan & R01/R02</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Pengurusan pendaftaran acara balapan & padang mengikut rumah sukan, janaan automatik Borang MSSM R01 & R02 (dengan No. Jersi), serta jadual kutipan mata terkini.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+            <i data-lucide="activity" class="w-5 h-5"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm mb-1.5">Kejohanan Merentas Desa</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Perekodan masa pemenang individu (1-15), taburan mata penamat zon 16-50, pengiraan automatik juara rumah sukan dan kawalan keselamatan penghapusan keputusan.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center mb-4">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm mb-1.5">Kawalan Akses & Hak Milik</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Perlindungan integriti data: Hanya akaun Admin, Penyelaras, GPK Ko, dan Setiausaha Sukan dibenarkan menghapus laporan, rekod dan maklumat rasmi unit.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Panduan Jalankan Sistem -->
+    <div id="cara-jalankan" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm mb-8">
+      <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+        <i data-lucide="play-circle" class="w-5 h-5 text-emerald-600 mr-2"></i>
+        Panduan Menjalankan Sistem di Komputer Sekolah (Tempatan)
+      </h3>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-700">
+        <div class="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">1</span>
+          <div>
+            <p class="font-bold text-slate-900">Buka Folder Projek</p>
+            <p class="text-slate-600">Buka folder sistem di komputer anda: <code class="bg-slate-200 px-1.5 py-0.5 rounded text-xs font-mono text-slate-800">C:\Antigravity\Sistem Pengurusan Unit Kokurikulum</code></p>
+          </div>
+        </div>
+
+        <div class="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">2</span>
+          <div>
+            <p class="font-bold text-slate-900">Klik Dwi-Kali Fail `start.bat`</p>
+            <p class="text-slate-600">Fail ini akan memulakan pelayan tempatan Uvicorn secara automatik dan memastikan pangkalan data sedia digunakan.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">3</span>
+          <div>
+            <p class="font-bold text-slate-900">Buka Pelayar Web</p>
+            <p class="text-slate-600">Buka Google Chrome atau Microsoft Edge dan layari: <a href="http://127.0.0.1:8000" target="_blank" class="text-blue-600 underline font-semibold">http://127.0.0.1:8000</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-4">
+      <p class="font-medium text-slate-700">Unit Kokurikulum Sekolah Kebangsaan Sungai Dendang &copy; 2026/2027</p>
+      <p class="mt-1 text-slate-400">Dibangunkan khas untuk pengurusan sistematik & janaan dokumen rasmi sekolah.</p>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

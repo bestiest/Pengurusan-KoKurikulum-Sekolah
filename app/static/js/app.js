@@ -14535,9 +14535,6 @@ const app = {
 
     const schoolEmail = (school && school.email) ? school.email : "ABA6038@1bestarinet.yes.my";
 
-    let rawPrincipal = (school && school.principal_name) ? school.principal_name : "SABARIAH BINTI ARIFFIN";
-    rawPrincipal = rawPrincipal.replace(/\s*\(.*?\)\s*/g, '').trim().toUpperCase();
-
     const programName = (letter.program_name || "-").toUpperCase();
     const destination = (letter.destination_venue || "-").toUpperCase();
 
@@ -14604,112 +14601,111 @@ const app = {
       : `_____________`;
 
     return `
-      <div class="landscape-sheet letter-parent-sheet bg-white text-black p-0 rounded-none shadow-2xl border-0 w-full max-w-[1060px] mb-8 print:w-full print:max-w-none print:m-0 print:p-0 print:border-none print:shadow-none" style="page-break-after: always !important; break-after: page !important; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;">
-        <div style="border: 1.5px solid #000; display: grid; grid-template-columns: 1fr 1fr; box-sizing: border-box; min-height: 184mm;">
+      <div class="landscape-sheet letter-parent-sheet bg-white text-black p-0 rounded-none shadow-2xl border-0 w-full max-w-[1100px] mb-8 print:w-full print:max-w-none print:m-0 print:p-0 print:border-none print:shadow-none" style="page-break-after: always !important; break-after: page !important; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;">
+        <div style="border: 1.5px solid #000; display: grid; grid-template-columns: 1fr 1fr; box-sizing: border-box; min-height: 182mm;">
           
           <!-- SEBELAH KIRI: SURAT MAKLUMAN SEKOLAH -->
-          <div style="padding: 16px 20px; border-right: 1.5px solid #000; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+          <div style="padding: 16px 20px; border-right: 1.5px solid #000; display: flex; flex-direction: column; box-sizing: border-box;">
             <div>
               <!-- Header Surat Makluman -->
               <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                  <img src="/static/images/school_logo.png?v=3" style="width: 50px; height: 50px; object-fit: contain;" alt="Logo SK Sungai Dendang">
-                  <div style="font-size: 9.5pt; font-weight: bold; line-height: 1.25; text-transform: uppercase;">
+                  <img src="/static/images/school_logo.png?v=3" style="width: 52px; height: 52px; object-fit: contain;" alt="Logo SK Sungai Dendang">
+                  <div style="font-size: 10pt; font-weight: bold; line-height: 1.25; text-transform: uppercase;">
                     <div>SK SUNGAI DENDANG</div>
                     <div>34130 SELAMA</div>
                     <div>PERAK DR.</div>
                   </div>
                 </div>
-                <div style="text-align: right; font-size: 8pt; line-height: 1.35; padding-top: 2px;">
+                <div style="text-align: right; font-size: 8.8pt; line-height: 1.35; padding-top: 2px;">
                   <div>Email : ${schoolEmail}</div>
                   <div style="font-weight: 500; margin-top: 2px;">Tarikh : ${tarikhSurat}</div>
                 </div>
               </div>
 
               <!-- Salutation -->
-              <div style="font-size: 9pt; font-weight: bold; margin-bottom: 8px;">Tuan, puan,</div>
+              <div style="font-size: 9.5pt; font-weight: bold; margin-bottom: 8px;">Tuan, puan,</div>
 
               <!-- Content paragraph 1 -->
-              <div style="font-size: 8.5pt; text-align: justify; line-height: 1.45; margin-bottom: 12px;">
+              <div style="font-size: 9.2pt; text-align: justify; line-height: 1.45; margin-bottom: 14px;">
                 Dengan sukacita dimaklumkan bahawa anak / jagaan tuan / puan yang bernama ${studentNameDisplay} dari kelas ${classNameDisplay} telah terpilih untuk mengikuti aktiviti / program tersebut pada ketentuan berikut :
               </div>
 
               <!-- Ketentuan Table -->
-              <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 8.5pt;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 9pt;">
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; width: 28%; text-align: left;">AKTIVITI</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${programName}</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; width: 28%; text-align: left;">AKTIVITI</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: center;">${programName}</td>
                 </tr>
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: left;">TARIKH</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${tarikhProgram}</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: left;">TARIKH</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: center;">${tarikhProgram}</td>
                 </tr>
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: left;">MASA / HARI</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${masaHariProgram}</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: left;">MASA / HARI</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: center;">${masaHariProgram}</td>
                 </tr>
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: left;">TEMPAT</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${destination}</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: left;">TEMPAT</td>
+                  <td style="border: 1.5px solid #000; padding: 5px 8px; font-weight: bold; text-align: center;">${destination}</td>
                 </tr>
               </table>
 
               <!-- Content paragraph 2 -->
-              <div style="font-size: 8.5pt; text-align: justify; line-height: 1.45; margin-bottom: 14px;">
+              <div style="font-size: 9.2pt; text-align: justify; line-height: 1.45; margin-bottom: 14px;">
                 2. &nbsp; Sehubungan dengan ini, pihak sekolah memohon tuan / puan melengkapkan borang kebenaran yang disertakan dan mengembalikannya dengan kadar yang segera.
               </div>
             </div>
 
-            <!-- Sign-off Guru Besar -->
-            <div style="font-size: 8.5pt; line-height: 1.35; margin-top: 10px;">
+            <!-- Sign-off Pengesahan Sekolah (Dikosongkan supaya GPK Ko / Guru Besar boleh cop & sign manual) -->
+            <div style="margin-top: auto; font-size: 9.2pt; line-height: 1.45; padding-top: 14px;">
               <div>Sekian, Terima Kasih</div>
               <div style="font-weight: bold; margin: 4px 0;">“BERKHIDMAT UNTUK NEGARA”</div>
               <div>Saya yang menurut perintah,</div>
-              <div style="margin-top: 36px;">
-                <div style="border-bottom: 1px dotted #000; width: 200px;"></div>
-                <div style="font-weight: bold; text-transform: uppercase; margin-top: 4px; font-size: 8.5pt;">(${rawPrincipal})</div>
-                <div style="font-size: 8pt; text-transform: uppercase; font-weight: 500;">GURU BESAR</div>
+              <div style="margin-top: 50px;">
+                <div style="border-bottom: 1px dotted #000; width: 220px;"></div>
+                <div style="margin-top: 5px; font-size: 9.2pt;">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
               </div>
             </div>
           </div>
 
           <!-- SEBELAH KANAN: SURAT KEBENARAN IBU BAPA -->
-          <div style="padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+          <div style="padding: 16px 20px; display: flex; flex-direction: column; box-sizing: border-box;">
             <div>
               <!-- Centered Box Header -->
               <div style="text-align: center; margin-bottom: 12px;">
-                <div style="display: inline-block; border: 1.5px solid #000; padding: 3px 26px; font-weight: bold; font-size: 10.5pt; letter-spacing: 0.5px;">
+                <div style="display: inline-block; border: 1.5px solid #000; padding: 4px 28px; font-weight: bold; font-size: 11pt; letter-spacing: 0.5px;">
                   KEBENARAN IBU BAPA
                 </div>
               </div>
 
               <!-- Parent Statement -->
-              <div style="font-size: 8.2pt; text-align: justify; line-height: 1.4; margin-bottom: 10px;">
+              <div style="font-size: 8.8pt; text-align: justify; line-height: 1.42; margin-bottom: 12px;">
                 Saya ${guardianNameDisplay} ibu bapa / penjaga membenarkan anak di bawah jagaan saya yang bernama ${studentNameDisplay} Sijil Beranak / K.P. bernombor ${icNumberDisplay} untuk menyertai aktiviti tersebut seperti ketentuan di bawah ini. :
               </div>
 
               <!-- Ketentuan Table (Identical) -->
-              <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 8.2pt;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 8.8pt;">
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; width: 28%; text-align: left;">AKTIVITI</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${programName}</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; width: 28%; text-align: left;">AKTIVITI</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: center;">${programName}</td>
                 </tr>
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: left;">TARIKH</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${tarikhProgram}</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: left;">TARIKH</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: center;">${tarikhProgram}</td>
                 </tr>
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: left;">MASA / HARI</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${masaHariProgram}</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: left;">MASA / HARI</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: center;">${masaHariProgram}</td>
                 </tr>
                 <tr>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: left;">TEMPAT</td>
-                  <td style="border: 1.5px solid #000; padding: 4px 8px; font-weight: bold; text-align: center;">${destination}</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: left;">TEMPAT</td>
+                  <td style="border: 1.5px solid #000; padding: 4.5px 8px; font-weight: bold; text-align: center;">${destination}</td>
                 </tr>
               </table>
 
               <!-- Clauses 2, 3, 4 -->
-              <div style="font-size: 7.7pt; text-align: justify; line-height: 1.35;">
+              <div style="font-size: 8.2pt; text-align: justify; line-height: 1.35;">
                 <div style="margin-bottom: 4px;">
                   2. &nbsp; Sehubungan dengan ini, saya ingin memaklumkan bahawa anak / jagaan saya adalah sihat, tiada masalah kesihatan dan boleh mengambil bahagian dalam aktiviti berkenaan. Saya juga mengakui bahawa anak saya dilindungi oleh Insuran Takaful.
                 </div>
@@ -14721,39 +14717,39 @@ const app = {
                 </div>
               </div>
 
-              <div style="font-size: 8pt; margin-top: 4px; margin-bottom: 6px;">Sekian, terima kasih.</div>
+              <div style="font-size: 8.5pt; margin-top: 4px; margin-bottom: 6px;">Sekian, terima kasih.</div>
             </div>
 
             <!-- Parent Sign details -->
-            <div style="font-size: 7.8pt; line-height: 1.6; margin-top: 4px;">
+            <div style="margin-top: auto; font-size: 8.4pt; line-height: 1.55; padding-top: 6px;">
               <table style="width: 100%; border-collapse: collapse; border: none;">
                 <tr style="border: none;">
-                  <td style="border: none; padding: 1.5px 0; width: 44%;">Tandatangan ibu bapa / penjaga</td>
-                  <td style="border: none; padding: 1.5px 0; width: 4%;">:</td>
-                  <td style="border: none; padding: 1.5px 0; width: 52%;">_________________________</td>
+                  <td style="border: none; padding: 2px 0; width: 44%;">Tandatangan ibu bapa / penjaga</td>
+                  <td style="border: none; padding: 2px 0; width: 4%;">:</td>
+                  <td style="border: none; padding: 2px 0; width: 52%;">_________________________</td>
                 </tr>
                 <tr style="border: none;">
-                  <td style="border: none; padding: 1.5px 0;">Nombor Kad Pengenalan</td>
-                  <td style="border: none; padding: 1.5px 0;">:</td>
-                  <td style="border: none; padding: 1.5px 0;">_________________________</td>
+                  <td style="border: none; padding: 2px 0;">Nombor Kad Pengenalan</td>
+                  <td style="border: none; padding: 2px 0;">:</td>
+                  <td style="border: none; padding: 2px 0;">_________________________</td>
                 </tr>
                 <tr style="border: none;">
-                  <td style="border: none; padding: 1.5px 0;">Tarikh</td>
-                  <td style="border: none; padding: 1.5px 0;">:</td>
-                  <td style="border: none; padding: 1.5px 0;">_________________________</td>
+                  <td style="border: none; padding: 2px 0;">Tarikh</td>
+                  <td style="border: none; padding: 2px 0;">:</td>
+                  <td style="border: none; padding: 2px 0;">_________________________</td>
                 </tr>
                 <tr style="border: none;">
-                  <td style="border: none; padding: 1.5px 0; vertical-align: top;">Alamat Rumah</td>
-                  <td style="border: none; padding: 1.5px 0; vertical-align: top;">:</td>
-                  <td style="border: none; padding: 1.5px 0;">
+                  <td style="border: none; padding: 2px 0; vertical-align: top;">Alamat Rumah</td>
+                  <td style="border: none; padding: 2px 0; vertical-align: top;">:</td>
+                  <td style="border: none; padding: 2px 0;">
                     ${addressDisplay}
                     ${st && st.address ? '' : '<br>____________________________________________'}
                   </td>
                 </tr>
                 <tr style="border: none;">
-                  <td style="border: none; padding: 1.5px 0;">No. Telefon (Rumah)</td>
-                  <td style="border: none; padding: 1.5px 0;">:</td>
-                  <td style="border: none; padding: 1.5px 0;">
+                  <td style="border: none; padding: 2px 0;">No. Telefon (Rumah)</td>
+                  <td style="border: none; padding: 2px 0;">:</td>
+                  <td style="border: none; padding: 2px 0;">
                     ____________________ &nbsp; Tel. Bimbit : ${phoneDisplay}
                   </td>
                 </tr>
@@ -14776,6 +14772,15 @@ const app = {
 
 
     const doc = document.getElementById("print-document-container");
+    if (doc) {
+      if (format === "health" || format === "r02") {
+        doc.classList.remove("max-w-4xl");
+        doc.classList.add("max-w-6xl");
+      } else {
+        doc.classList.remove("max-w-6xl");
+        doc.classList.add("max-w-4xl");
+      }
+    }
 
 
 
