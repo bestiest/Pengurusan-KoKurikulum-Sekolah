@@ -14610,7 +14610,7 @@ const app = {
               <!-- Header Surat Makluman -->
               <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                  <img src="/static/images/school_logo.png?v=3" style="width: 52px; height: 52px; object-fit: contain;" alt="Logo SK Sungai Dendang">
+                  <img src="static/images/school_logo.png?v=3" style="width: 52px; height: 52px; object-fit: contain;" alt="Logo SK Sungai Dendang">
                   <div style="font-size: 10pt; font-weight: bold; line-height: 1.25; text-transform: uppercase;">
                     <div>SK SUNGAI DENDANG</div>
                     <div>34130 SELAMA</div>
@@ -15060,7 +15060,7 @@ const app = {
 
 
 
-                        <img src="/static/images/mssm_logo.png" alt="MSSM Logo" style="height: 56px; width: auto; display: inline-block; object-fit: contain;">
+                        <img src="static/images/mssm_logo.png" alt="MSSM Logo" style="height: 56px; width: auto; display: inline-block; object-fit: contain;">
 
 
 
@@ -15072,7 +15072,7 @@ const app = {
 
 
 
-                        <img src="${school.logo_url || '/static/images/school_logo.png'}" alt="Logo Sekolah" style="height: 56px; width: auto; display: inline-block; object-fit: contain;">
+                        <img src="${school.logo_url || 'static/images/school_logo.png'}" alt="Logo Sekolah" style="height: 56px; width: auto; display: inline-block; object-fit: contain;">
 
 
 
@@ -16236,7 +16236,7 @@ const app = {
 
 
 
-                  <img src="/static/images/mssm_logo.png" alt="MSSM Logo" style="height: 60px; width: auto; display: inline-block; object-fit: contain;">
+                  <img src="static/images/mssm_logo.png" alt="MSSM Logo" style="height: 60px; width: auto; display: inline-block; object-fit: contain;">
 
 
 
@@ -19457,7 +19457,7 @@ const app = {
 
 
 
-              <img src="/static/images/logo.png" style="max-height: 55px; max-width: 55px;" onerror="this.style.display='none'">
+              <img src="static/images/logo.png" style="max-height: 55px; max-width: 55px;" onerror="this.style.display='none'">
 
 
 
@@ -21197,7 +21197,7 @@ const app = {
 
 
 
-                <img src="/static/images/logo.png" style="max-height: 45px; max-width: 45px;" onerror="this.style.display='none'">
+                <img src="static/images/logo.png" style="max-height: 45px; max-width: 45px;" onerror="this.style.display='none'">
 
 
 
@@ -24213,7 +24213,7 @@ const app = {
 
 
 
-                <img src="/static/images/school_logo.png" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="static/images/school_logo.png" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.style.display='none'">
 
 
 
@@ -28504,7 +28504,7 @@ onPajskFilterChange() {
 
 
 
-          <img src="${school.logo_url || '/static/images/school_logo.png'}" class="letterhead-logo" style="height: 65px; width: 65px; object-fit: contain;" alt="Logo Sekolah">
+          <img src="${school.logo_url || 'static/images/school_logo.png'}" class="letterhead-logo" style="height: 65px; width: 65px; object-fit: contain;" alt="Logo Sekolah">
 
 
 
